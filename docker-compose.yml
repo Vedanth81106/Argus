@@ -1,0 +1,22 @@
+services:
+
+  db:
+    image: postgres:latest
+    container_name: argus-db
+    environment:
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: argus_db
+    ports:
+      - "5433:5432" #5433 -> docker postgres
+  
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672" #Mesageing port
+      - "15672:15672" #dashboard port

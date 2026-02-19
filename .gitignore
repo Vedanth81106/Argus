@@ -1,0 +1,15 @@
+# Build files
+/target/
+*.class
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# Sensitive Config
+**/target
+**/application.properties
+
+# Docker data (if you mapped a local folder to a volume)
+/postgres_data/
