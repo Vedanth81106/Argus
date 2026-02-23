@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/repos")
 @RequiredArgsConstructor
@@ -17,7 +19,7 @@ public class MonitoredRepoController {
 
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
-    public MonitoredRepo addRepo(@RequestBody RepoDTO dto){
+    public MonitoredRepo addRepo(@RequestBody RepoDTO dto) throws IOException {
 
         return monitoredRepoService.addRepo(dto);
     }

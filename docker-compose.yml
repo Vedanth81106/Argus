@@ -2,13 +2,18 @@ services:
 
   db:
     image: postgres:latest
-    container_name: argus-db
+    container_name: argus_db
     environment:
       POSTGRES_USER: username
       POSTGRES_PASSWORD: password
       POSTGRES_DB: argus_db
     ports:
       - "5433:5432" #5433 -> docker postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U username -d argus_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   
   mongodb:
     image: mongo:latest
@@ -20,3 +25,8 @@ services:
     ports:
       - "5672:5672" #Mesageing port
       - "15672:15672" #dashboard port
+    healthcheck:
+      test: ["CMD-SHELL","rabbitmq-diagnostics -q check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

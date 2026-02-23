@@ -1,5 +1,6 @@
 package com.argus.orchestrator.entities;
 
+import com.argus.orchestrator.enums.PollStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +36,13 @@ public class MonitoredRepo {
 
     @Column(nullable = false)
     private String owner;
+
+    @Column
+    private String branch;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private PollStatus status;
 
     //nullable = true(by default) cus new repo will not have lastEtag or lastCommitSha
     //Etag is the header sent by github (300 NOT MODIFIED vs 200 OK)
