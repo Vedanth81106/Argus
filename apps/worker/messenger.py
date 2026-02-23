@@ -2,7 +2,7 @@ import pika
 import json
 import os
 
-def send_ai_feedback(channel, repo_id, commit_sha, ai_feedback):
+def send_ai_feedback(repo_id, commit_sha, ai_feedback, channel):
 
     result_payload = {
 

@@ -18,6 +18,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue resultsQueue() {
+        return new Queue("results-queue", true);
+    }
+
+    @Bean
     public TopicExchange exchange(){ // Use TopicExchange explicitly
         return new TopicExchange(topicExchangeName);
     }
