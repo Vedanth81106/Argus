@@ -29,6 +29,7 @@ public class MonitoredRepoService {
         }
 
         MonitoredRepo repo = githubService.fetchRepo(dto.getOwner(), dto.getRepoName());
+        MonitoredRepo savedRepo = monitoredRepoRepository.save(repo);
         checkRepoUpdate(repo); // so that it immediately sends repo to the job queue
 
         return monitoredRepoRepository.save(repo);

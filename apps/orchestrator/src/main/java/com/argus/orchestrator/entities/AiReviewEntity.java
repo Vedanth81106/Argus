@@ -3,6 +3,7 @@ package com.argus.orchestrator.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 //this entity looks similar to the DTO but it is relevant due to the fact that we are storing the review in a db
@@ -31,5 +32,8 @@ public class AiReviewEntity {
 
     @Column(columnDefinition = "TEXT")
     private String securityVulnerabilities;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
 }

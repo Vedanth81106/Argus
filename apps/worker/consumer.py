@@ -4,6 +4,7 @@ from reviewer import get_ai_review
 from messenger import send_ai_feedback
 
 def process_job(ch, method, properties, body, results_channel):
+
     try:
         data = json.loads(body)
         print("\n" + "="*30)

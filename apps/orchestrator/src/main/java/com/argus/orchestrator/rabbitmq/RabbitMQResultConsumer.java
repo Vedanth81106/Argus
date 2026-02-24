@@ -7,6 +7,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class RabbitMQResultConsumer {
 
@@ -27,6 +29,7 @@ public class RabbitMQResultConsumer {
         entity.setLogicErrors(review.logicErrors());
         entity.setPerformanceBottlenecks(review.performanceBottlenecks());
         entity.setSecurityVulnerabilities(review.securityVulnerabilities());
+        entity.setCreatedAt(LocalDateTime.now());
 
         aiReviewRepository.save(entity);
         System.out.println("Review saved to database with score: " + review.score());
