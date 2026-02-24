@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class RepoDTO {
+public class RepoDto {
 
     private String owner;
     private String repoName;

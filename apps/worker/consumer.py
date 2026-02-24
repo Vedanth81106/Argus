@@ -32,10 +32,6 @@ def process_job(ch, method, properties, body, results_channel):
 
             print(f" -> Processing {file_name}...")
 
-            # extract added/removed lines
-            added = [line[1:] for line in patch_data.split('\n') if line.startswith('+')]
-            removed = [line[1:] for line in patch_data.split('\n') if line.startswith('-')]
-
             file_context = f"\nFILE: {file_name}\nDIFF:\n{patch_data}\n"
             full_commit_context += file_context
 
@@ -45,7 +41,6 @@ def process_job(ch, method, properties, body, results_channel):
             ai_response = get_ai_review(full_commit_context)
             send_ai_feedback(repo_id, commit_sha, ai_response, results_channel)
             # send the ai response back to java
-            
 
         else:
             print("No significant code changes to review.")
@@ -65,23 +60,27 @@ def start_worker():
     # connection to RabbitMQ assuming its on localhost with default credentials
     # blocking = it will wait and hold the thread until a message is received
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+
     # we work with the channel and not the connection directly,
     # the channel is the medium through which we send and receive messages
-    channel = connection.channel()
+    consume_channel = connection.channel()
 
     # declaring the queue which should exactly match the one named in java
     # use durable = true because java file does so
-    channel.queue_declare(queue='orchestrator-queue', durable=True)
-    channel.queue_declare(queue='results-queue', durable=True)
+    consume_channel.queue_declare(queue='orchestrator-queue', durable=True)
 
-    # only give the worker one message at a time.
-    #dont give another one until the current message gets acked
-    channel.basic_qos(prefetch_count=1)
+    # only give the worker one message at a time. dont give another one until the current message gets acked
+    consume_channel.basic_qos(prefetch_count=1)
 
-    channel.basic_consume( # consume messages
+    # separate channel for publishing results
+    results_channel = connection.channel()
+    results_channel.queue_declare(queue='results-queue', durable=True)
+    results_channel.basic_qos(prefetch_count=1)
+
+    consume_channel.basic_consume( # consume messages
         queue = "orchestrator-queue",
-        on_message_callback = lambda ch, method, properties, body:
-            process_job(ch, method, properties, body, channel),
+        on_message_callback=lambda ch, method, properties, body:
+            process_job(ch, method, properties, body, results_channel),
 
         # ack = acknowledgement, we set it to false because we want it to resend the message in case of a crash
         auto_ack = False
@@ -91,4 +90,4 @@ def start_worker():
     print("python worker is waiting for messages...")
 
     #starts an infinite loop that waits for messages and calls the callback function when a message is received
-    channel.start_consuming()
+    consume_channel.start_consuming()

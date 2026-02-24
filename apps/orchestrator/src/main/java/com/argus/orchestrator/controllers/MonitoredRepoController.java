@@ -1,8 +1,7 @@
 package com.argus.orchestrator.controllers;
 
-import com.argus.orchestrator.dtos.RepoDTO;
+import com.argus.orchestrator.dtos.RepoDto;
 import com.argus.orchestrator.entities.MonitoredRepo;
-import com.argus.orchestrator.repositories.MonitoredRepoRepository;
 import com.argus.orchestrator.services.MonitoredRepoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,7 +18,7 @@ public class MonitoredRepoController {
 
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
-    public MonitoredRepo addRepo(@RequestBody RepoDTO dto) throws IOException {
+    public MonitoredRepo addRepo(@RequestBody RepoDto dto) throws IOException {
 
         return monitoredRepoService.addRepo(dto);
     }

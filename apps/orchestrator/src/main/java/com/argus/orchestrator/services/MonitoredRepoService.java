@@ -1,6 +1,6 @@
 package com.argus.orchestrator.services;
 
-import com.argus.orchestrator.dtos.RepoDTO;
+import com.argus.orchestrator.dtos.RepoDto;
 import com.argus.orchestrator.entities.MonitoredRepo;
 import com.argus.orchestrator.repositories.MonitoredRepoRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class MonitoredRepoService {
     private final RabbitTemplate rabbitTemplate;
     private final GithubService githubService;
 
-    public MonitoredRepo addRepo(RepoDTO dto) throws IOException {
+    public MonitoredRepo addRepo(RepoDto dto) throws IOException {
 
         if(monitoredRepoRepository.findByOwnerAndRepositoryName(dto.getOwner(), dto.getRepoName()).isPresent()){
             throw new IllegalStateException("Repo already exists!");

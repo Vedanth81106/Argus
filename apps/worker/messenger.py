@@ -1,14 +1,18 @@
 import pika
 import json
-import os
 
-def send_ai_feedback(repo_id, commit_sha, ai_feedback, channel):
+def send_ai_feedback(repo_id, commit_sha, review_data, channel):
+
+    # review_data is the dict returned by the get_ai_review
 
     result_payload = {
-
+        "score": review_data.get("score", 0),
+        "summary": review_data.get("summary", "No summary provided"),
         "repoId": repo_id,
         "commitSha": commit_sha,
-        "aiFeedback": ai_feedback
+        "logicErrors": review_data.get("logic_errors", "None"),
+        "performanceBottlenecks": review_data.get("performance_bottlenecks", "None"),
+        "securityVulnerabilities": review_data.get("security_vulnerabilities", "None")
     }
 
     channel.basic_publish(
