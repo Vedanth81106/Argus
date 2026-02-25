@@ -16,6 +16,9 @@
 **/application.properties
 **/github-cache/
 
-# Docker data (if you mapped a local folder to a volume)
+# Docker data
 /postgres_data/github-cache/
 .env
+
+**/dist/
+**/node_modules/
