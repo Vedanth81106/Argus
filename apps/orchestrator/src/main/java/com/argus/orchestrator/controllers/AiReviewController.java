@@ -20,7 +20,6 @@ public class AiReviewController {
         return aiReviewRepository.findAll();
     }
 
-    // example: http://localhost:8080/api/reviews/repo/Vedanth81106-Argus
     @GetMapping("/repo/{repoId}")
     public List<AiReviewEntity> getByRepo(@PathVariable String repoId) {
         return aiReviewRepository.findByRepoIdOrderByCreatedAtDesc(repoId);

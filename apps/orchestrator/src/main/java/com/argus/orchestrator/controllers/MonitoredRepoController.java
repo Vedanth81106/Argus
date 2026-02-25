@@ -12,6 +12,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/repos")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class MonitoredRepoController {
 
     private final MonitoredRepoService monitoredRepoService;
