@@ -80,15 +80,14 @@ public class GithubService {
         List<HashMap<String, String>> patchData = new ArrayList<>();
 
         for(GHCommit.File file : commit.listFiles()){
-
             HashMap<String, String> patchMap = new HashMap<>();
-
             String fileName = file.getFileName();
-            patchMap.put("file",fileName);
-
             String patch = file.getPatch();
-            if(patch == null || patch.isEmpty()) continue;
-            patchMap.put("patch",patch);
+
+            System.out.println("📦 Found file: " + fileName + " (Patch size: " + (patch != null ? patch.length() : "NULL") + ")");
+
+            patchMap.put("file", fileName);
+            patchMap.put("patch", (patch != null && !patch.isEmpty()) ? patch : "New file added: Full content review required.");
 
             patchData.add(patchMap);
         }
