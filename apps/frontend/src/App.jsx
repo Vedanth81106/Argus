@@ -1,27 +1,20 @@
-import { useEffect, useState } from 'react'
-import LandingPage from "./components/LandingPage.jsx";
-import Dashboard from "./components/Dashboard.jsx";
+import React, { useState } from 'react';
+import LandingPage from './components/LandingPage';
+import Dashboard from './components/Dashboard';
 
-export default function App() {
-    const [isStarted, setIsStarted] = useState(false);
+function App() {
+    // Use a boolean or a string to track the current "page"
+    const [view, setView] = useState('landing');
 
     return (
-        <div className="overflow-hidden h-screen w-screen bg-[#020617]">
-            <div
-                className={`flex w-[200vw] h-full transition-transform duration-1000 ease-in-out ${
-                    isStarted ? "-translate-x-100vw" : "translate-x-0"
-                }`}
-            >
-                {/* landing page */}
-                <div className="w-screen h-full">
-                    <LandingPage onStart={() => setIsStarted(true)} />
-                </div>
-
-                {/* dashboard */}
-                <div className="w-screen h-full overflow-y-auto">
-                    <Dashboard />
-                </div>
-            </div>
+        <div className="min-h-screen bg-[#020617] font-sans selection:bg-blue-500/30 animate-in fade-in zoom-in-95 duration-700">
+            {view === 'landing' ? (
+                <LandingPage onStart={() => setView('dashboard')} />
+            ) : (
+                <Dashboard onBack={() => setView('landing')} />
+            )}
         </div>
     );
 }
+
+export default App;
