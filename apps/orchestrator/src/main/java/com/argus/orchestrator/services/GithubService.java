@@ -11,6 +11,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -19,6 +23,8 @@ import java.util.List;
 
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class GithubService {
@@ -41,6 +47,79 @@ public class GithubService {
                 .withConnector(new OkHttpGitHubConnector(client))
                 .withOAuthToken(githubToken)
                 .build();
+    }
+
+    public List<String> getAllUsersContainingString(String username) throws IOException {
+
+        String url = "https://api.github.com/search/users?q=" + username;
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        HttpRequest request =  HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + githubToken)
+                .header("User-Agent", "Argus-App")
+                .header("Accept", "application/vnd.github+json")
+                .header("X-GitHub-Api-Version", "2022-11-28")
+                .GET()
+                .build();
+
+        try{
+
+            List<String> usernames = new ArrayList<>();
+            HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            String responseBody = response.body().toString();
+            ObjectMapper mapper = new ObjectMapper();
+
+            JsonNode rootNode = mapper.readTree(responseBody);
+
+            if(rootNode.get("items") != null && rootNode.get("items").isArray()){
+                for(JsonNode node : rootNode.get("items")){
+                    usernames.add(node.get("login").asText());
+                }
+            }
+            return usernames;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<String> getAllReposFromUser(String username) throws IOException {
+
+        String url = "https://api.github.com/users/" + username +"/repos";
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        HttpRequest request =  HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + githubToken)
+                .header("User-Agent", "Argus-App")
+                .header("Accept", "application/vnd.github+json")
+                .header("X-GitHub-Api-Version", "2022-11-28")
+                .GET()
+                .build();
+
+        try{
+
+            List<String> repos = new ArrayList<>();
+            HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            String responseBody = response.body().toString();
+            ObjectMapper mapper = new ObjectMapper();
+
+            JsonNode rootNode = mapper.readTree(responseBody);
+
+            if(rootNode.isArray()){
+                for(JsonNode node : rootNode){
+                    repos.add(node.get("name").asText());
+                }
+            }
+
+            return repos;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public MonitoredRepo fetchRepo(String owner, String repoName){
