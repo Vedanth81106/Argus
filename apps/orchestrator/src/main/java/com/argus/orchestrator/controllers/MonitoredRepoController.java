@@ -1,5 +1,6 @@
 package com.argus.orchestrator.controllers;
 
+import com.argus.orchestrator.dtos.GitHubUserResponse;
 import com.argus.orchestrator.dtos.RepoDto;
 import com.argus.orchestrator.entities.MonitoredRepo;
 import com.argus.orchestrator.services.GithubService;
@@ -20,7 +21,7 @@ public class MonitoredRepoController {
     private final MonitoredRepoService monitoredRepoService;
     private final GithubService githubService;
 
-    @PostMapping("/monitored-repos/add")
+    @PostMapping("/repos/add")
     @ResponseStatus(HttpStatus.CREATED)
     public MonitoredRepo addRepo(@RequestBody RepoDto dto) throws IOException {
 
@@ -28,7 +29,7 @@ public class MonitoredRepoController {
     }
 
     @GetMapping("/users/{username}")
-    public List<String>  getUsersContainingString(@PathVariable String username) throws IOException {
+    public List<GitHubUserResponse>  getUsersContainingString(@PathVariable String username) throws IOException {
         return githubService.getAllUsersContainingString(username);
     }
 

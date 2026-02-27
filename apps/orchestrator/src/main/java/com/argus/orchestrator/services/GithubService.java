@@ -1,5 +1,6 @@
 package com.argus.orchestrator.services;
 
+import com.argus.orchestrator.dtos.GitHubUserResponse;
 import com.argus.orchestrator.entities.MonitoredRepo;
 import jakarta.annotation.PostConstruct;
 import org.kohsuke.github.*;
@@ -12,14 +13,17 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
@@ -49,9 +53,9 @@ public class GithubService {
                 .build();
     }
 
-    public List<String> getAllUsersContainingString(String username) throws IOException {
+    public List<GitHubUserResponse> getAllUsersContainingString(String username) throws IOException {
 
-        String url = "https://api.github.com/search/users?q=" + username;
+        String url = "https://api.github.com/search/users?q=" + URLEncoder.encode(username, StandardCharsets.UTF_8);
 
         HttpClient client = HttpClient.newBuilder().build();
 
@@ -66,7 +70,7 @@ public class GithubService {
 
         try{
 
-            List<String> usernames = new ArrayList<>();
+            List<GitHubUserResponse> usernames = new ArrayList<>();
             HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             String responseBody = response.body().toString();
@@ -76,10 +80,10 @@ public class GithubService {
 
             if(rootNode.get("items") != null && rootNode.get("items").isArray()){
                 for(JsonNode node : rootNode.get("items")){
-                    usernames.add(node.get("login").asText());
+                    usernames.add(new GitHubUserResponse(node.get("login").asText(), node.get("avatar_url").asText()));
                 }
             }
-            return usernames;
+            return usernames.stream().limit(15).collect(Collectors.toList());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -87,7 +91,7 @@ public class GithubService {
 
     public List<String> getAllReposFromUser(String username) throws IOException {
 
-        String url = "https://api.github.com/users/" + username +"/repos";
+        String url = "https://api.github.com/users/" + username + "/repos?sort=updated&per_page=10";
 
         HttpClient client = HttpClient.newBuilder().build();
 

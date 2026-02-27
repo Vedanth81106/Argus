@@ -1,6 +1,4 @@
 import React from 'react';
-import SidebarScroller from "./SidebarScroller.jsx";
-
 const LandingPage = ({ onStart }) => {
 
     const features = [
