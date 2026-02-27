@@ -87,6 +87,7 @@ const RepoModal = ({ onClose, onAdd }) => {
                             className="p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-white/10 flex justify-between items-center group"
                         >
                             <span className="group-hover:text-blue-400">{repo}</span>
+
                         </div>
                     ))}
                 </div>

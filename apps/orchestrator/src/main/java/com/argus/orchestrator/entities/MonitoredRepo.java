@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -46,13 +48,16 @@ public class MonitoredRepo {
 
     //nullable = true(by default) cus new repo will not have lastEtag or lastCommitSha
     //Etag is the header sent by github (300 NOT MODIFIED vs 200 OK)
-    @Column(name = "last_etag")
+    @Column()
     private String lastEtag;
 
     // Secure Hash Algo, unique code for every single commit
-    @Column(name = "last_commit_sha")
+    @Column()
     private String lastCommitSha;
 
-    @Column(name = "last_polled_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime lastPolledAt;
+
+    @OneToMany(mappedBy = "monitoredRepo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AiReviewEntity> reviews = new ArrayList<>();
 }

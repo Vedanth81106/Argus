@@ -36,4 +36,8 @@ public class AiReviewEntity {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @ManyToOne
+    @JoinColumn(name = "monitored_repo")
+    private MonitoredRepo monitoredRepo;
+
 }

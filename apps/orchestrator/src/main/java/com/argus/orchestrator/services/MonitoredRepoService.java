@@ -1,6 +1,7 @@
 package com.argus.orchestrator.services;
 
 import com.argus.orchestrator.dtos.RepoDto;
+import com.argus.orchestrator.entities.AiReviewEntity;
 import com.argus.orchestrator.entities.MonitoredRepo;
 import com.argus.orchestrator.repositories.MonitoredRepoRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.management.monitor.Monitor;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -86,4 +88,12 @@ public class MonitoredRepoService {
 
         MonitoredRepo savedRepo = monitoredRepoRepository.save(repo);
     }
+
+    public void deleteRepo(RepoDto dto){
+        MonitoredRepo existingRepo = monitoredRepoRepository.findByOwnerAndRepositoryName(dto.getOwner(), dto.getRepoName())
+                .orElseThrow(() -> new NoSuchElementException("Repo not found!"));
+
+        monitoredRepoRepository.delete(existingRepo);
+    }
+
 }

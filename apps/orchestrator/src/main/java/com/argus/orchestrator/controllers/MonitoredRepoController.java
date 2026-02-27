@@ -37,4 +37,10 @@ public class MonitoredRepoController {
     public List<String>  getAllReposFromUser(@PathVariable String username) throws IOException {
         return githubService.getAllReposFromUser(username);
     }
+
+    @DeleteMapping("/repos/delete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteRepo(@RequestBody RepoDto dto) throws IOException {
+        monitoredRepoService.deleteRepo(dto);
+    }
 }
