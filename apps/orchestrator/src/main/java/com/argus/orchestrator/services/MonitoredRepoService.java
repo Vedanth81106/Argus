@@ -14,6 +14,7 @@ import javax.management.monitor.Monitor;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -49,8 +50,8 @@ public class MonitoredRepoService {
         updateRepo(repo, latestCommitSha);
     }
 
-    @Scheduled(fixedRate = 10000)
-    // @Scheduled(fixedRate = 45, timeUnit = TimeUnit.MINUTES)
+    // @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 30, timeUnit = TimeUnit.MINUTES)
     public void pollRepos() {
         LocalDateTime thirtyMinsAgo = LocalDateTime.now().minusMinutes(1);
 
@@ -87,6 +88,10 @@ public class MonitoredRepoService {
         else return;
 
         MonitoredRepo savedRepo = monitoredRepoRepository.save(repo);
+    }
+
+    public List<MonitoredRepo> findAll() {
+        return monitoredRepoRepository.findAll();
     }
 
     public void deleteRepo(RepoDto dto){

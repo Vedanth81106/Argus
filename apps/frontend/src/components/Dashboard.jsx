@@ -1,9 +1,26 @@
-import React, { useState } from 'react';
-import RepoModal from './RepoModal';
+import React, {useEffect, useState} from 'react';
+import AddNewRepoModal from './AddNewRepoModal.jsx';
+import MonitoredRepository from "./MonitoredRepository.jsx";
 
 const Dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [repos, setRepos] = useState([]); // Array of connected repos
+
+    useEffect(() => {
+        const fetchSavedRepos = async () => {
+            try {
+                const response = await fetch("http://localhost:8080/api/repos"); // You'll need this endpoint
+                if (response.ok) {
+                    const data = await response.json();
+                    setRepos(data);
+                }
+            } catch (error) {
+                console.error("Failed to load monitors:", error);
+            }
+        };
+
+        fetchSavedRepos();
+    }, []);
 
     return (
         <div className="relative min-h-screen bg-[#020617] text-white p-8 font-atkins">
@@ -16,7 +33,7 @@ const Dashboard = () => {
                 +
             </button>
 
-            {/* center stagec */}
+            {/* center stage */}
             <main className="max-w-6xl mx-auto mt-20 h-[60vh] flex items-center justify-center">
                 {repos.length === 0 ? (
                     <div className="w-full h-full border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center text-gray-500">
@@ -30,20 +47,12 @@ const Dashboard = () => {
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-                        {/* Map through repos here in Phase 2 */}
-                        {repos.map((repo, idx) => (
-                            <div key={idx} className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-                                {repo.name}
-                            </div>
-                        ))}
-                    </div>
+                    <MonitoredRepository repos ={repos} setRepos={setRepos} />
                 )}
             </main>
 
-            {/* Modal Integration */}
             {isModalOpen && (
-                <RepoModal
+                <AddNewRepoModal
                     onClose={() => setIsModalOpen(false)}
                     onAdd={(newRepo) => setRepos([...repos, newRepo])}
                 />

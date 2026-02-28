@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import useSearch from '../hooks/useSearch.jsx';
 
-const RepoModal = ({ onClose, onAdd }) => {
+const AddNewRepoModal = ({ onClose, onAdd }) => {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({ username: '', repoName: '', avatar: '' });
     const [displayResults, setDisplayResults] = useState([]);
@@ -19,31 +19,43 @@ const RepoModal = ({ onClose, onAdd }) => {
         setStep(2);
     };
 
-    const handleRepoSelect = async(name) => {
+    const handleEscKeyPress = useCallback((event) => {
+        if(event.key === 'Escape'){
+            onClose();
+        }
+    },[onClose]);
+
+    useEffect(() => {
+        document.addEventListener('keydown', handleEscKeyPress);
+
+        return () => {
+            document.removeEventListener('keydown', handleEscKeyPress);
+        };
+    }, [handleEscKeyPress]);
+
+    const handleRepoSelect = async (name) => {
         const payload = {
             owner: formData.username,
-            repoName: formData.repoName
+            repoName: name
         };
 
-        try{
-         const response = await fetch("http://localhost:8080/api/repos/add",{
-             method:'POST',
-             headers: {'Content-Type':'application/json'},
-             body: JSON.stringify(payload)
-         });
+        try {
+            const response = await fetch("http://localhost:8080/api/repos/add", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-         if(response.ok){
-             const savedRepo = await response.json();
-             onAdd(savedRepo)
-             onClose();
-         }
-        }catch(error){
+            if (response.ok) {
+                const savedRepoFromDb = await response.json();
+                onAdd(savedRepoFromDb);
+                onClose();
+            } else {
+                console.error("Server error while adding repo");
+            }
+        } catch (error) {
             console.error("Failed to add repo: " + error);
         }
-
-        setFormData({ ...formData, repoName: name });
-        onAdd({ name: `${formData.username}/${name}`, avatar: formData.avatar });
-        onClose();
     };
 
     const handleUrlPaste = (e) => {
@@ -101,16 +113,17 @@ const RepoModal = ({ onClose, onAdd }) => {
                         </div>
                     ))}
 
-                    {step === 2 && displayResults.map((repo) => (
-                        <div
-                            key={repo}
-                            onClick={() => handleRepoSelect(repo)}
-                            className="p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-white/10 flex justify-between items-center group"
-                        >
-                            <span className="group-hover:text-blue-400">{repo}</span>
-
-                        </div>
-                    ))}
+                    {step === 2 && displayResults
+                        .filter(repo => !formData.repoName || repo.toLowerCase().includes(formData.repoName.toLowerCase()))
+                        .map((repo) => (
+                            <div
+                                key={repo}
+                                onClick={() => {handleRepoSelect(repo), onClose()}}
+                                className="p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-white/10 flex justify-between items-center group"
+                            >
+                                <span className="group-hover:text-blue-400">{repo}</span>
+                            </div>
+                        ))}
                 </div>
                 <div className="mt-8 pt-6 border-t border-white/5">
                     <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-3 font-bold">
@@ -144,4 +157,4 @@ const RepoModal = ({ onClose, onAdd }) => {
     );
 };
 
-export default RepoModal;
+export default AddNewRepoModal;

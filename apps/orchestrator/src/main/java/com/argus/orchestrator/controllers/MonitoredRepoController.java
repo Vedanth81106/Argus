@@ -38,6 +38,11 @@ public class MonitoredRepoController {
         return githubService.getAllReposFromUser(username);
     }
 
+    @GetMapping("/repos")
+    public List<MonitoredRepo> getAllRepos() {
+        return monitoredRepoService.findAll();
+    }
+
     @DeleteMapping("/repos/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteRepo(@RequestBody RepoDto dto) throws IOException {
