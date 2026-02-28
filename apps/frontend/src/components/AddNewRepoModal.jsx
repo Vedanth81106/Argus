@@ -19,7 +19,28 @@ const RepoModal = ({ onClose, onAdd }) => {
         setStep(2);
     };
 
-    const handleRepoSelect = (name) => {
+    const handleRepoSelect = async(name) => {
+        const payload = {
+            owner: formData.username,
+            repoName: formData.repoName
+        };
+
+        try{
+         const response = await fetch("http://localhost:8080/api/repos/add",{
+             method:'POST',
+             headers: {'Content-Type':'application/json'},
+             body: JSON.stringify(payload)
+         });
+
+         if(response.ok){
+             const savedRepo = await response.json();
+             onAdd(savedRepo)
+             onClose();
+         }
+        }catch(error){
+            console.error("Failed to add repo: " + error);
+        }
+
         setFormData({ ...formData, repoName: name });
         onAdd({ name: `${formData.username}/${name}`, avatar: formData.avatar });
         onClose();
