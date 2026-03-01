@@ -1,24 +1,35 @@
-# Build files
-/target/
-*.class
-**/__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# --- Frontend (Next.js) ---
+node_modules/
+.next/
+out/
+build/
+.env*.local
+.vercel
 
-# IDE files
+# --- Backend (Java/Maven) ---
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# --- Python Bits ---
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# --- IDEs & OS ---
 .idea/
 .vscode/
 *.iml
+.DS_Store
+Thumbs.db
 
-# Sensitive Config
-**/target
-**/application.properties
-**/github-cache/
-
-# Docker data
-/postgres_data/github-cache/
+# --- Sensitive Config & Data ---
 .env
+application.properties
+github-cache/
+postgres_data/
 
-**/dist/
-**/node_modules/
+# --- Docker ---
+.docker/

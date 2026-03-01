@@ -1,3 +1,4 @@
+"use client"
 import React, {useCallback, useEffect, useState} from 'react';
 import useSearch from '../hooks/useSearch.jsx';
 
@@ -40,7 +41,7 @@ const AddNewRepoModal = ({ onClose, onAdd }) => {
         };
 
         try {
-            const response = await fetch("http://localhost:8080/api/repos/add", {
+            const response = await fetch("/api/repos/add", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

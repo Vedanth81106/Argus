@@ -1,3 +1,5 @@
+"use client"
+
 import {useEffect, useState} from "react";
 
 export default function useSearch(query, type, username){
@@ -15,8 +17,8 @@ export default function useSearch(query, type, username){
             setIsLoading(true);
             try {
                 const endpoint = type === 'users'
-                    ? `http://localhost:8080/api/users/${encodeURIComponent(query)}`
-                    : `http://localhost:8080/api/users/${username}/repos`
+                    ? `/api/users/${encodeURIComponent(query)}`
+                    : `/api/users/${username}/repos`
 
                 const response = await fetch(endpoint);
                 const data = await response.json();

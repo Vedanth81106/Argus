@@ -1,6 +1,8 @@
+"use client"
+
 import React, {useEffect, useState} from 'react';
-import AddNewRepoModal from './AddNewRepoModal.jsx';
-import MonitoredRepository from "./MonitoredRepository.jsx";
+import AddNewRepoModal from '../components/AddNewRepoModal.jsx';
+import MonitoredRepository from "../components/MonitoredRepository.jsx";
 
 const Dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -9,7 +11,7 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchSavedRepos = async () => {
             try {
-                const response = await fetch("http://localhost:8080/api/repos"); // You'll need this endpoint
+                const response = await fetch("api/repos");
                 if (response.ok) {
                     const data = await response.json();
                     setRepos(data);
@@ -37,7 +39,7 @@ const Dashboard = () => {
             <main className="max-w-6xl mx-auto mt-20 h-[60vh] flex items-center justify-center">
                 {repos.length === 0 ? (
                     <div className="w-full h-full border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center text-gray-500">
-                        <div className="text-4xl mb-4 opacity-20">👁️</div>
+                        <div className="text-4xl mb-4 opacity-20"></div>
                         <p className="tracking-widest uppercase text-[11px] font-bold">No Repositories Observed</p>
                         <button
                             onClick={() => setIsModalOpen(true)}

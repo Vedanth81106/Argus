@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 
 // Added setRepos so we can remove the card from the UI instantly
@@ -10,7 +11,7 @@ export default function MonitoredRepository({ repos, setRepos }) {
         };
 
         try {
-            const response = await fetch("http://localhost:8080/api/repos/delete", {
+            const response = await fetch("/api/repos/delete", {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
@@ -35,7 +36,7 @@ export default function MonitoredRepository({ repos, setRepos }) {
                 <div key={repo.id} className="p-6 bg-white/5 border border-blue-500 rounded-2xl flex justify-between items-center group">
                     <div className="flex flex-col">
                         <span className="text-xs text-gray-500 uppercase tracking-widest">{repo.owner}</span>
-                        <span className="font-bold text-lg">{repo.repoName}</span>
+                        <span className="font-bold text-white">{repo.repositoryName}</span>
                     </div>
 
                     <button

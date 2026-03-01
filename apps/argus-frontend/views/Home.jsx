@@ -1,5 +1,9 @@
+"use client";
+
 import React from 'react';
-const LandingPage = ({ onStart }) => {
+import AnimatedAura from '../components/ui/AnimatedComponent.jsx';
+
+const Home = ({ onStart }) => {
 
     const features = [
         'Logic Analysis',
@@ -10,14 +14,14 @@ const LandingPage = ({ onStart }) => {
     ];
 
     return (
-        <div className="font-atkins relative min-h-screen bg-[#020617] overflow-hidden flex flex-col items-center justify-center font-sans">
+        <div className="font-raleway relative min-h-screen bg-background overflow-hidden flex flex-col items-center justify-center">
 
             {/* glow effect */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border-radius: 9999px bg-blue-500/15 blur-[120px] rounded-full pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-250 h-125 border-radius: 9999px bg-secondary/15 blur-[120px] rounded-full pointer-events-none" />
 
             {/* main content */}
             <div className="relative z-10 text-center px-4">
-                <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-tight bg-gradient-to-b from-white via-blue-200 to-blue-500 bg-clip-text text-transparent mb-6">
+                <h1 className="font-cinzel text-6xl md:text-8xl font-bold  leading-tight bg-linear-to-b from-white to-primary bg-clip-text text-transparent mb-6">
                     Argus
                 </h1>
 
@@ -26,6 +30,14 @@ const LandingPage = ({ onStart }) => {
                     in real-time—so you can focus on building what matters.
                 </p>
 
+                <AnimatedAura rounded="rounded-full" className="inline-block">
+                    <button onClick={onStart}
+                            className="px-8 py-3 cursor-pointer bg-background text-secondary hover:bg-transparent transition-colors text-lg">
+                        Get Started
+                    </button>
+                </AnimatedAura>
+
+                {/*
                 <div className="flex items-center justify-center gap-4">
                     <button
                         onClick={onStart}
@@ -35,10 +47,11 @@ const LandingPage = ({ onStart }) => {
                         Get started
                     </button>
                 </div>
+                */}
             </div>
 
         </div>
     );
 };
 
-export default LandingPage;
+export default Home;
