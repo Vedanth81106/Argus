@@ -1,53 +1,48 @@
 "use client";
 
-import React from 'react';
-import AnimatedAura from '../components/ui/AnimatedComponent.jsx';
+import React from "react";
+import { SparklesCore } from "@/components/ui/sparkles";
+import Navbar from "@/components/ui/Navbar";
+import {HoverBorderGradient} from "@/components/ui/hover-border-gradient";
 
-const Home = ({ onStart }) => {
-
-    const features = [
-        'Logic Analysis',
-        'Security Triage',
-        'Performance Metrics',
-        'System Health',
-        'Code Review'
-    ];
-
+const Home = () => {
     return (
-        <div className="font-raleway relative min-h-screen bg-background overflow-hidden flex flex-col items-center justify-center">
+        <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
 
-            {/* glow effect */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-250 h-125 border-radius: 9999px bg-secondary/15 blur-[120px] rounded-full pointer-events-none" />
+            <Navbar />
+            <SparklesCore
+                id="sparkles"
+                className="absolute inset-0"
+                background="background"
+                minSize={1.0}
+                maxSize={4.0}
+                particleDensity={90}
+                particleColor="ternary"
+                speed={0.4}
+            />
 
-            {/* main content */}
-            <div className="relative z-10 text-center px-4">
-                <h1 className="font-cinzel text-6xl md:text-8xl font-bold  leading-tight bg-linear-to-b from-white to-primary bg-clip-text text-transparent mb-6">
-                    Argus
-                </h1>
+            <div className="text-center space-y-5 max-w-2xl z-10 relative text-foreground">
+                <div className={"space-y-3 tracking-tighter bg-linear-to-r from-secondary from-0% via-primary via-80% to-ternary to-100% bg-clip-text text-transparent"}>
+                    {/* Main Title */}
+                    <h1 className="pb-2 text-7xl font-cinzel font-bold tracking-tight ">
+                        Argus
+                    </h1>
 
-                <p className="max-w-xl mx-auto text-gray-400 text-lg md:text-xl leading-relaxed mb-10">
-                    Let Argus configure, review, and secure your code commits
-                    in real-time—so you can focus on building what matters.
-                </p>
-
-                <AnimatedAura rounded="rounded-full" className="inline-block">
-                    <button onClick={onStart}
-                            className="px-8 py-3 cursor-pointer bg-background text-secondary hover:bg-transparent transition-colors text-lg">
-                        Get Started
-                    </button>
-                </AnimatedAura>
-
-                {/*
-                <div className="flex items-center justify-center gap-4">
-                    <button
-                        onClick={onStart}
-                        className="px-8 py-3 bg-white text-black font-bold rounded-full hover:bg-white/25
-                            hover:text-white transition-colors duration-700 ease-in-out active:scale-95 cursor-pointer"
-                    >
-                        Get started
-                    </button>
+                    {/* Sub Headline */}
+                    <h3 className="text-6xl font-semibold pb-4">
+                        Intelligent Repository Oversight
+                    </h3>
                 </div>
-                */}
+
+                <p className={"text-lg text-pretty"}>Automated code reviews and <span className={"bg-clip-text text-transparent bg-linear-to-r from-primary via-rose-500 to-ternary"}>security-monitoring</span> powered by AI. Get instant feedback on every commit
+                    and keep your <span className={"bg-clip-text text-transparent bg-linear-to-r from-ternary via-rose-500 to-primary"}>repositories</span> clean, secure, and optimized.</p>
+
+                <div className="flex justify-center mt-12">
+                    <HoverBorderGradient className="text-foreground font-bold tracking-widest text-sm">
+                        Get Started
+                    </HoverBorderGradient>
+                </div>
+
             </div>
 
         </div>

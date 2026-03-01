@@ -1,4 +1,5 @@
 import "./globals.css";
+import Navbar from "@/components/ui/Navbar";
 
 export const metadata = {
     title: "Argus",
@@ -22,10 +23,8 @@ export default function RootLayout({ children }) {
                 rel="stylesheet"
             />
         </head>
-        <body className="antialiased bg-gray-900 text-gray-100">
-        {/* {children} is where your page.js (and Dashboard) will be injected.
-            Next.js handles the <script> tags automatically!
-        */}
+        <body className="antialiased bg-background text-foreground">
+        <Navbar></Navbar>
         {children}
         </body>
         </html>
