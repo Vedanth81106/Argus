@@ -3,9 +3,9 @@
 import React from "react";
 import { SparklesCore } from "@/components/ui/sparkles";
 import Navbar from "@/components/ui/Navbar";
-import {HoverBorderGradient} from "@/components/ui/hover-border-gradient";
+import {BorderAnimation} from "@/components/ui/BorderAnimation";
 
-const Home = () => {
+const Home = ({onStart}) => {
     return (
         <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
 
@@ -16,7 +16,7 @@ const Home = () => {
                 background="background"
                 minSize={1.0}
                 maxSize={4.0}
-                particleDensity={90}
+                particleDensity={125}
                 particleColor="ternary"
                 speed={0.4}
             />
@@ -37,10 +37,12 @@ const Home = () => {
                 <p className={"text-lg text-pretty"}>Automated code reviews and <span className={"bg-clip-text text-transparent bg-linear-to-r from-primary via-rose-500 to-ternary"}>security-monitoring</span> powered by AI. Get instant feedback on every commit
                     and keep your <span className={"bg-clip-text text-transparent bg-linear-to-r from-ternary via-rose-500 to-primary"}>repositories</span> clean, secure, and optimized.</p>
 
-                <div className="flex justify-center mt-12">
-                    <HoverBorderGradient className="text-foreground font-bold tracking-widest text-sm">
-                        Get Started
-                    </HoverBorderGradient>
+                <div className="mt-12 w-full"> {/* Outer wrapper ensures we have the full width to center within */}
+                    <div onClick={onStart} className="onClick w-fit mx-auto transform transition duration-150 ease-in-out active:scale-90">
+                        <BorderAnimation className="cursor-pointer text-foreground font-bold tracking-widest text-sm">
+                            Get Started
+                        </BorderAnimation>
+                    </div>
                 </div>
 
             </div>

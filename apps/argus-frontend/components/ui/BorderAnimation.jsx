@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
-export function HoverBorderGradient({
+export function BorderAnimation({
                                         children,
                                         containerClassName,
                                         className,
@@ -53,13 +53,13 @@ export function HoverBorderGradient({
             )}
             {...props}
         >
-            <div className={cn("w-auto z-10 bg-[var(--color-background)] px-6 py-2 rounded-none skew-x-12", className)}>
+            <div className={cn("w-auto z-10 bg-(--color-background) px-6 py-2 rounded-none skew-x-12", className)}>
                 {children}
             </div>
             <motion.div
                 className={cn("flex-none inset-0 overflow-hidden absolute z-0 rounded-none")}
                 style={{
-                    filter: "blur(8px)",
+                    filter: "blur(6px)",
                     position: "absolute",
                     width: "100%",
                     height: "100%",
@@ -72,7 +72,7 @@ export function HoverBorderGradient({
                 }}
                 transition={{ ease: "linear", duration: duration ?? 1 }}
             />
-            <div className="bg-[var(--color-background)] absolute z-1 flex-none inset-[2px] rounded-none" />
+            <div className="bg-(--color-background) absolute z-1 flex-none inset-0.5 rounded-none" />
         </Tag>
     );
 }

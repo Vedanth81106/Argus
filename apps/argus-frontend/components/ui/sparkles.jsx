@@ -70,18 +70,25 @@ export const SparklesCore = ({
                             events: {
                                 onHover: {
                                     enable: true,
-                                    mode: ["attract", "grab"],
+                                    mode: [/*"attract",*/ "grab"],
                                 },
-                                onClick: {
-                                    enable: true,
-                                    mode: ["push"] // Click to add more sparkles
-                                }
+
                             },
                             modes: {
+                                grab: {
+                                    distance: 150,       // Lines only appear within 150px
+                                    links: {
+                                        opacity: 0.3,    // Faint lines feel "slower" to the eye
+                                    },
+                                },
+                                /*attract: {
+                                    distance: 200,
+                                    speed: 1,
+                                    factor: 0.1,
+                                    easing: "ease-out-quad",
+                                },*/
 
-                                push: {
-                                    quantity: 5, // Add 4 particles on every click
-                                }
+
                             }
                         },
 
@@ -100,7 +107,7 @@ export const SparklesCore = ({
 
                             move: {
                                 enable: true,
-                                speed: { min: 0.1, max: 0.6 },
+                                speed: { min: 0.3, max: 1 },
                                 direction: "none",
                                 outModes: { default: "out" },
                             },
