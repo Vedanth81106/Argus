@@ -1,5 +1,6 @@
 package com.argus.orchestrator.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -37,7 +38,8 @@ public class AiReviewEntity {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne
-    @JoinColumn(name = "monitored_repo")
+    @JsonBackReference
+    @JoinColumn(name = "monitored_repo_id")
     private MonitoredRepo monitoredRepo;
 
 }

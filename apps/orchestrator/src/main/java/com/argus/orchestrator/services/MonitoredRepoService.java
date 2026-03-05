@@ -6,6 +6,7 @@ import com.argus.orchestrator.entities.MonitoredRepo;
 import com.argus.orchestrator.repositories.MonitoredRepoRepository;
 import lombok.RequiredArgsConstructor;
 import org.kohsuke.github.GHCommit;
+import org.kohsuke.github.GHRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -32,13 +33,18 @@ public class MonitoredRepoService {
         }
 
         MonitoredRepo repo = githubService.fetchRepo(dto.getOwner(), dto.getRepoName());
-        MonitoredRepo savedRepo = monitoredRepoRepository.save(repo);
-        checkRepoUpdate(repo); // so that it immediately sends repo to the job queue
-
-        return monitoredRepoRepository.save(repo);
+        // saveAndFlush() forces Hibernate to send the data to the database immediately and wait for the response
+        MonitoredRepo savedRepo = monitoredRepoRepository.saveAndFlush(repo);
+        checkRepoUpdate(savedRepo); // so that it immediately sends repo to the job queue
+        return savedRepo;
     }
 
     public void checkRepoUpdate(MonitoredRepo repo) throws IOException {
+
+        // ensure we have the ID if it was just saved
+        if (repo.getId() == null) {
+            repo = monitoredRepoRepository.saveAndFlush(repo);
+        }
 
         GHCommit currentCommit = githubService.getLatestCommit(repo);
         String latestCommitSha = currentCommit.getSHA1();
@@ -78,6 +84,16 @@ public class MonitoredRepoService {
         rabbitTemplate.convertAndSend("orchestrator-exchange", "repo.update.event", job);
         System.out.println("Job sent to RabbitMQ");
 
+    }
+
+    public void triggerManualAudit(UUID repoId, String commitSha) throws IOException {
+        MonitoredRepo repo = monitoredRepoRepository.findById(repoId)
+                .orElseThrow(() -> new NoSuchElementException("Repo not found"));
+
+        GHRepository repository = githubService.getGHRepository(repo);
+        GHCommit commit = repository.getCommit(commitSha);
+
+        sendJob(repo, commit);
     }
 
     private void updateRepo(MonitoredRepo repo, String newSha) {

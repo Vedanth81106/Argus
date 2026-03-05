@@ -2,13 +2,13 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import useSearch from '../hooks/useSearch.jsx';
 
-const AddNewRepoModal = ({ onClose, onAdd }) => {
+const AddNewRepoModal = ({onClose, onAdd}) => {
     const [step, setStep] = useState(1);
-    const [formData, setFormData] = useState({ username: '', repoName: '', avatar: '' });
+    const [formData, setFormData] = useState({username: '', repoName: '', avatar: ''});
     const [displayResults, setDisplayResults] = useState([]);
 
     const currentQuery = step === 1 ? formData.username : formData.repoName;
-    const { results, isLoading } = useSearch(currentQuery, step === 1 ? 'users' : 'repos',formData.username);
+    const {results, isLoading} = useSearch(currentQuery, step === 1 ? 'users' : 'repos', formData.username);
 
     useEffect(() => {
         setDisplayResults(results);
@@ -16,15 +16,15 @@ const AddNewRepoModal = ({ onClose, onAdd }) => {
 
     const handleUserSelect = (user) => {
         setDisplayResults([]);
-        setFormData({ ...formData, username: user.username, avatar: user.avatarUrl });
+        setFormData({...formData, username: user.username, avatar: user.avatarUrl});
         setStep(2);
     };
 
     const handleEscKeyPress = useCallback((event) => {
-        if(event.key === 'Escape'){
+        if (event.key === 'Escape') {
             onClose();
         }
-    },[onClose]);
+    }, [onClose]);
 
     useEffect(() => {
         document.addEventListener('keydown', handleEscKeyPress);
@@ -43,7 +43,7 @@ const AddNewRepoModal = ({ onClose, onAdd }) => {
         try {
             const response = await fetch("/api/repos/add", {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
             });
 
@@ -67,7 +67,7 @@ const AddNewRepoModal = ({ onClose, onAdd }) => {
             const owner = match[1];
             const repo = match[2].replace('.git', '');
 
-            onAdd({ name: `${owner}/${repo}`, avatar: `https://github.com/${owner}.png` });
+            onAdd({name: `${owner}/${repo}`, avatar: `https://github.com/${owner}.png`});
             onClose();
         }
     };
@@ -76,8 +76,8 @@ const AddNewRepoModal = ({ onClose, onAdd }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
             <div className="w-full max-w-md bg-[#0a0f1e] border border-white/10 rounded-3xl p-8 shadow-2xl">
                 <div className="flex gap-2 mb-8">
-                    <div className={`h-1 flex-1 rounded-full ${step >= 1 ? 'bg-blue-500' : 'bg-white/10'}`} />
-                    <div className={`h-1 flex-1 rounded-full ${step >= 2 ? 'bg-blue-500' : 'bg-white/10'}`} />
+                    <div className={`h-1 flex-1 rounded-full ${step >= 1 ? 'bg-blue-500' : 'bg-white/10'}`}/>
+                    <div className={`h-1 flex-1 rounded-full ${step >= 2 ? 'bg-blue-500' : 'bg-white/10'}`}/>
                 </div>
 
                 <h2 className="text-2xl font-bold mb-2">
@@ -109,7 +109,7 @@ const AddNewRepoModal = ({ onClose, onAdd }) => {
                             onClick={() => handleUserSelect(user)}
                             className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group"
                         >
-                            <img src={user.avatarUrl} alt="" className="w-8 h-8 rounded-full border border-white/10" />
+                            <img src={user.avatarUrl} alt="" className="w-8 h-8 rounded-full border border-white/10"/>
                             <span className="group-hover:text-blue-400 transition-colors">{user.username}</span>
                         </div>
                     ))}
@@ -119,7 +119,9 @@ const AddNewRepoModal = ({ onClose, onAdd }) => {
                         .map((repo) => (
                             <div
                                 key={repo}
-                                onClick={() => {handleRepoSelect(repo), onClose()}}
+                                onClick={() => {
+                                    handleRepoSelect(repo), onClose()
+                                }}
                                 className="p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-white/10 flex justify-between items-center group"
                             >
                                 <span className="group-hover:text-blue-400">{repo}</span>

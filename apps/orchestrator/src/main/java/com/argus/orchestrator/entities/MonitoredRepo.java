@@ -1,6 +1,7 @@
 package com.argus.orchestrator.entities;
 
 import com.argus.orchestrator.enums.PollStatus;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -58,6 +59,7 @@ public class MonitoredRepo {
     @Column(nullable = false)
     private LocalDateTime lastPolledAt;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "monitoredRepo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AiReviewEntity> reviews = new ArrayList<>();
 }

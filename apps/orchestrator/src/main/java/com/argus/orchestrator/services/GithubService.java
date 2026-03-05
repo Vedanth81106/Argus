@@ -1,13 +1,17 @@
 package com.argus.orchestrator.services;
 
+import com.argus.orchestrator.dtos.CommitDto;
 import com.argus.orchestrator.dtos.GitHubUserResponse;
 import com.argus.orchestrator.entities.MonitoredRepo;
+import com.argus.orchestrator.repositories.MonitoredRepoRepository;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.kohsuke.github.*;
 import org.kohsuke.github.extras.okhttp3.OkHttpGitHubConnector;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
@@ -23,20 +27,25 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
+import reactor.core.publisher.Flux;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 @Service
+@RequiredArgsConstructor
 public class GithubService {
 
     @Value("${github.token}")
     private String githubToken;
 
-    private GitHub github;
+    private static GitHub github;
+    private WebClient webClient;
+    private final MonitoredRepoRepository monitoredRepoRepository;
 
     @PostConstruct // runs once the service starts
     public void init() throws IOException {
@@ -47,12 +56,37 @@ public class GithubService {
 
         OkHttpClient client  = new OkHttpClient.Builder().cache(cache).build();
 
-        this.github = new GitHubBuilder()
+        github = new GitHubBuilder()
                 .withConnector(new OkHttpGitHubConnector(client))
                 .withOAuthToken(githubToken)
                 .build();
+
+        this.webClient = WebClient.builder()
+                .baseUrl("https://api.github.com")
+                .defaultHeader("Authorization", "Bearer " + githubToken)
+                .defaultHeader("Accept", "application/vnd.github.v3+json")
+                .build();
     }
 
+    public GHRepository getGHRepository(MonitoredRepo repo) throws IOException {
+
+        return github.getRepository(repo.getOwner() + "/" + repo.getRepositoryName());
+    }
+
+    // custom method for fetching commit data through webflux
+    public Flux<CommitDto> streamCommits(UUID id) {
+        return monitoredRepoRepository.findById(id)
+                .map(repoEntity -> {
+                    return webClient.get()
+                            .uri("/repos/{owner}/{repo}/commits?per_page=50",
+                                    repoEntity.getOwner(),
+                                    repoEntity.getRepositoryName())
+                            .retrieve()
+                            .bodyToFlux(CommitDto.class);
+                })
+                .orElseGet(Flux::empty); // if repo doesn't exist, return empty stream
+    }
+    
     public List<GitHubUserResponse> getAllUsersContainingString(String username) throws IOException {
 
         String url = "https://api.github.com/search/users?q=" + URLEncoder.encode(username, StandardCharsets.UTF_8);
