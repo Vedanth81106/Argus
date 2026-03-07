@@ -1,13 +1,26 @@
 "use client"
 
 import React, { useEffect, useState } from "react";
-import ReviewModalComponent from "@/components/ui/ReviewModalComponent";
+import ReviewModalComponent from "@/components/ReviewModalComponent";
 
 export default function RepoHistory({ repoId }) {
     const [commits, setCommits] = useState([]);
     const [selectedSha, setSelectedSha] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isStreaming, setIsStreaming] = useState(false); // Track if stream is active
+
+    const handleOpenReview = async (sha) => {
+
+        try {
+            await fetch(`/api/repos/${repoId}/audit/${sha}`, { method: "POST" });
+        } catch (e) {
+            console.error("Audit trigger failed", e);
+        }
+
+        // 2. Open the modal to show the progress/results
+        setSelectedSha(sha);
+        setIsModalOpen(true);
+    };
 
     const fetchCommitsStream = async () => {
         setIsStreaming(true);
@@ -58,11 +71,6 @@ export default function RepoHistory({ repoId }) {
             fetchCommitsStream();
         }
     }, [repoId]);
-
-    const handleOpenReview = (sha) => {
-        setSelectedSha(sha);
-        setIsModalOpen(true);
-    };
 
     return (
         <div className="p-8 max-w-5xl mx-auto">

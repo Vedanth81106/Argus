@@ -30,7 +30,7 @@ public class AiReviewController {
 
     @GetMapping("/{sha}")
     public ResponseEntity<CodeReview> getReviewBySha(@PathVariable String sha) {
-        return codeReviewRepository.findByCommitSha(sha)
+        return codeReviewRepository.findFirstByCommitShaOrderByCreatedAtDesc(sha)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

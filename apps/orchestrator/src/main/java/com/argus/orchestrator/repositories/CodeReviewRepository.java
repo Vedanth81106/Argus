@@ -9,6 +9,6 @@ import java.util.UUID;
 
 public interface CodeReviewRepository extends JpaRepository<CodeReview, UUID> {
     List<CodeReview> findByRepoIdOrderByCreatedAtDesc(String repoId);
-    Optional<CodeReview> findByCommitSha(String commitSha);
+    Optional<CodeReview> findFirstByCommitShaOrderByCreatedAtDesc(String commitSha);
     boolean existsByCommitSha(String commitSha);
 }

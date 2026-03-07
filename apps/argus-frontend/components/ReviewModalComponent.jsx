@@ -23,11 +23,8 @@ export default function ReviewModalComponent({ commitSha, repoId }) {
                     return;
                 }
 
-                // trigger audit
-                await fetch(`/api/repos/${repoId}/audit/${commitSha}`, { method: "POST" });
-
-                // small delay so backend registers listener
-                await new Promise(r => setTimeout(r, 300));
+                await new Promise(resolve => setTimeout(resolve, 500));
+                if (!active) return;
 
                 // listen for completion
                 eventSourceRef.current = new EventSource(`http://localhost:8080/api/stream/reviews/${commitSha}`);

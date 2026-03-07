@@ -27,6 +27,9 @@ public class SseService {
                 emitter.send(review);
                 emitter.complete();
             }catch(IOException e){
+                emitter.completeWithError(e);
+            }
+            finally{
                 emitters.remove(sha);
             }
         }

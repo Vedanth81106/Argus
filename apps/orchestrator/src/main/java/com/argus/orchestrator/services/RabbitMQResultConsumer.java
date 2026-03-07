@@ -9,7 +9,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,7 +43,7 @@ public class RabbitMQResultConsumer {
 
         MonitoredRepo repo = repoOpt.get();
 
-        CodeReview entity = codeReviewRepository.findByCommitSha(review.commitSha())
+        CodeReview entity = codeReviewRepository.findFirstByCommitShaOrderByCreatedAtDesc(review.commitSha())
                 .orElseGet(() -> {
                     System.out.println("No pending review found, creating fresh entity.");
                     CodeReview newReview = new CodeReview();
