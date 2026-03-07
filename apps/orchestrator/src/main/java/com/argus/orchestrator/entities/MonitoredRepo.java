@@ -61,5 +61,5 @@ public class MonitoredRepo {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "monitoredRepo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AiReviewEntity> reviews = new ArrayList<>();
+    private List<CodeReview> reviews = new ArrayList<>();
 }

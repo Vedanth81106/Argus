@@ -13,21 +13,37 @@ class ReviewResponse(BaseModel):
     performance_bottlenecks: str
     score: int
 
-client = genai.Client(api_key=os.getenv("gemini-api-key"))
+client = genai.Client(api_key=os.getenv("gemini_api_key"))
 
-def get_ai_review(context: str) -> ReviewResponse:
+def get_ai_review(context: str, past_reviews: list) -> ReviewResponse:
 
-    prompt = f"""
-    You are an elite Senior Software Engineer and Security Researcher.
-    Review the following code changes from a Git commit.
-    
-    Look for:
-    1. Logic errors or potential bugs.
-    2. Security vulnerabilities (SQL injection, XSS, etc.).
-    3. Performance bottlenecks.
-    
-    Also, provide a short summary of the commit.  
-    If there are no logic errors, vulnerabilities or bottlenecks, simply say "No issues found under that key"
+    context_history = ""
+    if past_reviews:
+        context_history = " Similar past reviews for this context: "
+        for review in past_reviews:
+            m=review.metadata
+            context_history += f"-Past summary: {m.get('summary', 'No summary')}"
+            context_history += f", logic errors: {m.get('logic_errors','No info')}"
+            context_history += f", security vulnerabilities: {m.get('security_vulnerabilities','No info')}"
+            context_history += f", performance bottlenecks: {m.get('performance_bottlenecks','No info')}."
+
+    SYSTEM_PROMPT = f"""
+    You are an elite Senior Software Engineer. 
+    Review the code provided. Use the 'Similar past reviews' provided below 
+    to ensure consistency. If a similar bug was caught before, make sure 
+    to highlight it again if it exists in the new code.
+     Always provide a score from 1 to 10, where 10 is perfect code and 1 is extremely buggy code.
+    {context_history}
+     Your review should be in JSON format with the following fields:
+    - summary: A brief summary of the review.
+    - logic_errors: A description of any logic errors found in the code.
+    - security_vulnerabilities: A description of any security vulnerabilities found in the code.
+    - performance_bottlenecks: A description of any performance bottlenecks found in the code.
+    - score: An integer score from 1 to 10 indicating the overall quality of the code.
+     Always respond in the specified JSON format, and never include any explanations outside of it.
+     If the code is perfect, respond with a score of 10 and empty strings for the other fields.
+     If the code is extremely buggy, respond with a score of 1 and detailed explanations in the other fields.
+     Remember to use the 'Similar past reviews' to maintain consistency in your evaluations."
     """
 
     try:

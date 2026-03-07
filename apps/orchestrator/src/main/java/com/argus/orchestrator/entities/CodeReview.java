@@ -12,13 +12,15 @@ import java.util.UUID;
 @Entity
 @Table(name = "reviews")
 @Data
-public class AiReviewEntity {
+public class CodeReview {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String repoId;
+
+    @Column(nullable = false, unique = true, updatable = false)
     private String commitSha;
     private int score;
 

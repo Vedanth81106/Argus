@@ -1,17 +1,13 @@
 package com.argus.orchestrator.controllers;
 
-import com.argus.orchestrator.dtos.CommitDto;
-import com.argus.orchestrator.entities.AiReviewEntity;
-import com.argus.orchestrator.repositories.AiReviewRepository;
+import com.argus.orchestrator.entities.CodeReview;
+import com.argus.orchestrator.repositories.CodeReviewRepository;
 import com.argus.orchestrator.services.GithubService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -19,22 +15,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AiReviewController {
 
-    private final AiReviewRepository aiReviewRepository;
+    private final CodeReviewRepository codeReviewRepository;
     private final GithubService githubService;
 
     @GetMapping
-    public List<AiReviewEntity> getAll() {
-        return aiReviewRepository.findAll();
+    public List<CodeReview> getAll() {
+        return codeReviewRepository.findAll();
     }
 
     @GetMapping("/repo/{repoId}")
-    public List<AiReviewEntity> getByRepo(@PathVariable String repoId) {
-        return aiReviewRepository.findByRepoIdOrderByCreatedAtDesc(repoId);
+    public List<CodeReview> getByRepo(@PathVariable String repoId) {
+        return codeReviewRepository.findByRepoIdOrderByCreatedAtDesc(repoId);
     }
 
     @GetMapping("/{sha}")
-    public ResponseEntity<AiReviewEntity> getReviewBySha(@PathVariable String sha) {
-        return aiReviewRepository.findByCommitSha(sha)
+    public ResponseEntity<CodeReview> getReviewBySha(@PathVariable String sha) {
+        return codeReviewRepository.findByCommitSha(sha)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

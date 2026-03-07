@@ -86,7 +86,7 @@ public class GithubService {
                 })
                 .orElseGet(Flux::empty); // if repo doesn't exist, return empty stream
     }
-    
+
     public List<GitHubUserResponse> getAllUsersContainingString(String username) throws IOException {
 
         String url = "https://api.github.com/search/users?q=" + URLEncoder.encode(username, StandardCharsets.UTF_8);

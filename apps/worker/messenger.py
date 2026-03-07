@@ -5,6 +5,9 @@ def send_ai_feedback(repo_id, commit_sha, review_data, channel):
 
     # review_data is the dict returned by the get_ai_review
 
+    if not isinstance(review_data, dict):
+        review_data = review_data.model_dump()
+
     result_payload = {
         "score": review_data.get("score", 0),
         "summary": review_data.get("summary", "No summary provided"),

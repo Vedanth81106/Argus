@@ -1,17 +1,19 @@
 package com.argus.orchestrator.services;
 
 import com.argus.orchestrator.dtos.RepoDto;
-import com.argus.orchestrator.entities.AiReviewEntity;
+import com.argus.orchestrator.entities.CodeReview;
 import com.argus.orchestrator.entities.MonitoredRepo;
+import com.argus.orchestrator.repositories.CodeReviewRepository;
 import com.argus.orchestrator.repositories.MonitoredRepoRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import javax.management.monitor.Monitor;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -25,6 +27,8 @@ public class MonitoredRepoService {
     private final MonitoredRepoRepository monitoredRepoRepository;
     private final RabbitTemplate rabbitTemplate;
     private final GithubService githubService;
+    private final WebClient.Builder webClientBuilder;
+    private final CodeReviewRepository codeReviewRepository;
 
     public MonitoredRepo addRepo(RepoDto dto) throws IOException {
 
@@ -75,6 +79,22 @@ public class MonitoredRepoService {
 
     public void sendJob(MonitoredRepo repo, GHCommit commit) throws IOException {
 
+        String commitSha = commit.getSHA1();
+        if(codeReviewRepository.existsByCommitSha(commitSha)){
+            System.out.println("Skipping review: Review for " + commitSha + "already exists!");
+            return;
+        }
+
+        CodeReview pendingReview = new CodeReview();
+        pendingReview.setCommitSha(commitSha);
+        pendingReview.setRepoId(repo.getId().toString());
+        pendingReview.setCreatedAt(LocalDateTime.now());
+        pendingReview.setMonitoredRepo(repo);
+        pendingReview.setSummary("AI is currently analyzing this commit...");
+        pendingReview.setScore(0);
+
+        codeReviewRepository.saveAndFlush(pendingReview);
+
         Map<String, Object> job = new HashMap<>();
 
         job.put("repoId", repo.getId());
@@ -110,11 +130,23 @@ public class MonitoredRepoService {
         return monitoredRepoRepository.findAll();
     }
 
+    @Transactional
     public void deleteRepo(RepoDto dto){
         MonitoredRepo existingRepo = monitoredRepoRepository.findByOwnerAndRepositoryName(dto.getOwner(), dto.getRepoName())
                 .orElseThrow(() -> new NoSuchElementException("Repo not found!"));
 
+        UUID repoId = existingRepo.getId();
+
         monitoredRepoRepository.delete(existingRepo);
+
+        webClientBuilder.build()
+                .delete()
+                .uri("http://localhost:8000/delete/{repo_id}", repoId)
+                .retrieve()
+                .toBodilessEntity()
+                .doOnSuccess(response -> System.out.println("Pinecone cleanup triggered for: " + repoId))
+                .doOnError(error -> System.err.println("AI Worker cleanup failed: " + error.getMessage()))
+                .subscribe();
     }
 
 }

@@ -14,11 +14,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  
-  mongodb:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
 
   rabbitmq:
     image: rabbitmq:3-management

@@ -1,7 +1,10 @@
 import pika
 import json
+import asyncio
 from reviewer import get_ai_review
 from messenger import send_ai_feedback
+from vectorizer import get_code_embedding
+from database import query_similar_reviews, upsert_review
 
 def process_job(ch, method, properties, body, results_channel):
 
@@ -38,8 +41,24 @@ def process_job(ch, method, properties, body, results_channel):
 
         # sned to ai only if we have something
         if full_commit_context:
-            print("Sending to Gemini for review...")
-            ai_response = get_ai_review(full_commit_context)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            vector = loop.run_until_complete(get_code_embedding(full_commit_context))
+
+            past_reviews = []
+            if vector:
+                past_reviews = query_similar_reviews(vector, top_k=3)
+                print(f"Found {len(past_reviews)} similar past reviews in Pinecone.")
+
+            print("Step 2: Sending to Gemini for review...")
+            ai_response = get_ai_review(full_commit_context, past_reviews)
+
+            if vector and ai_response:
+                metadata = ai_response.model_dump()
+                metadata["repo_id"] = str(repo_id)
+                upsert_review(commit_sha, vector, metadata)
+
             send_ai_feedback(repo_id, commit_sha, ai_response, results_channel)
             # send the ai response back to java
 
