@@ -13,7 +13,7 @@ import java.util.List;
 @RequestMapping("/api/reviews")
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
-public class AiReviewController {
+public class CodeReviewController {
 
     private final CodeReviewRepository codeReviewRepository;
     private final GithubService githubService;

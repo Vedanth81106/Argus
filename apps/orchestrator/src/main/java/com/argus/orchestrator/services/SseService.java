@@ -24,7 +24,9 @@ public class SseService {
         SseEmitter emitter = emitters.get(sha);
         if(emitter != null) {
             try{
-                emitter.send(review);
+                emitter.send(SseEmitter.event()
+                        .name("review-result")
+                        .data(review));
                 emitter.complete();
             }catch(IOException e){
                 emitter.completeWithError(e);

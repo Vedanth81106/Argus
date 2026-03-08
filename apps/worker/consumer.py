@@ -55,9 +55,13 @@ def process_job(ch, method, properties, body, results_channel):
             ai_response = get_ai_review(full_commit_context, past_reviews)
 
             if vector and ai_response:
-                metadata = ai_response.model_dump()
-                metadata["repo_id"] = str(repo_id)
-                upsert_review(commit_sha, vector, metadata)
+                if vector and ai_response:
+                    if isinstance(ai_response, dict):
+                        metadata = ai_response.copy()
+                    else:
+                        metadata = ai_response.model_dump()
+                    metadata["repo_id"] = str(repo_id)
+                    upsert_review(commit_sha, vector, metadata)
 
             send_ai_feedback(repo_id, commit_sha, ai_response, results_channel)
             # send the ai response back to java
