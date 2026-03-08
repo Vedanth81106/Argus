@@ -139,14 +139,18 @@ public class MonitoredRepoService {
 
         monitoredRepoRepository.delete(existingRepo);
 
-        webClientBuilder.build()
-                .delete()
-                .uri("http://localhost:8000/delete/{repo_id}", repoId)
-                .retrieve()
-                .toBodilessEntity()
-                .doOnSuccess(response -> System.out.println("Pinecone cleanup triggered for: " + repoId))
-                .doOnError(error -> System.err.println("AI Worker cleanup failed: " + error.getMessage()))
-                .subscribe();
+        // trigger ai worker cleanup
+        try {
+            webClientBuilder.build()
+                    .delete()
+                    .uri("http://localhost:8000/delete/{repo_id}", repoId)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+
+        } catch (Exception e) {
+            System.err.println("AI Worker cleanup failed, but SQL delete succeeded: " + e.getMessage());
+        }
     }
 
 }

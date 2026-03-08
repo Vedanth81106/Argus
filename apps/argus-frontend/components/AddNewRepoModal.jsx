@@ -59,16 +59,34 @@ const AddNewRepoModal = ({onClose, onAdd}) => {
         }
     };
 
-    const handleUrlPaste = (e) => {
+    const handleUrlPaste = async (e) => {
         const url = e.target.value;
         const match = url.match(/github\.com\/([^/]+)\/([^/]+)/);
 
         if (match) {
             const owner = match[1];
-            const repo = match[2].replace('.git', '');
+            const repo = match[2].replace('.git', '').replace(/\/$/, '');
 
-            onAdd({name: `${owner}/${repo}`, avatar: `https://github.com/${owner}.png`});
-            onClose();
+            try{
+                const response = await fetch("/api/repos/add",{
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        owner: owner,
+                        repoName: repo
+                    })
+                });
+
+                if (response.ok) {
+                    const savedRepoFromDb = await response.json();
+                    onAdd(savedRepoFromDb);
+                    onClose();
+                } else {
+                    console.error("Failed to add repo via URL paste");
+                }
+            }catch (error) {
+                console.error("URL paste error:", error);
+            }
         }
     };
 
@@ -119,9 +137,7 @@ const AddNewRepoModal = ({onClose, onAdd}) => {
                         .map((repo) => (
                             <div
                                 key={repo}
-                                onClick={() => {
-                                    handleRepoSelect(repo), onClose()
-                                }}
+                                onClick={() => { handleRepoSelect(repo) }}
                                 className="p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-white/10 flex justify-between items-center group"
                             >
                                 <span className="group-hover:text-blue-400">{repo}</span>

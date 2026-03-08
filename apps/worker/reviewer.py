@@ -49,7 +49,7 @@ def get_ai_review(context: str, past_reviews: list) -> ReviewResponse:
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash-lite",
+            model="gemini-3.1-flash-lite",
             contents=f"Please review this commit: \n{context}",
             config={
                 "system_instruction": SYSTEM_PROMPT,
@@ -68,7 +68,7 @@ def get_ai_review(context: str, past_reviews: list) -> ReviewResponse:
             "security_vulnerabilities": "N/A",
             "performance_bottlenecks": "N/A",
             "score": 0
-        } 
+        }
     '''
 
     print("Mock mode")

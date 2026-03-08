@@ -51,9 +51,22 @@ def query_similar_reviews(vector: list, top_k: int = 5):
 
 def delete_repo_reviews(repo_id: str):
     try:
-        index.delete(filter={"repo_id": {"$eq": repo_id}})
-        print(f"Deleted all Pinecone vectors for repo: {repo_id}")
+        results = index.query(
+            vector=[0] * 1024,
+            filter={"repo_id": {"$eq": repo_id}},
+            top_k=10000,
+            include_metadata=False
+        )
+
+        ids_to_delete = [match["id"] for match in results["matches"]]
+
+        if not ids_to_delete:
+            print(f"No vectors found for repo: {repo_id}")
+            return True
+
+        index.delete(ids=ids_to_delete)
+        print(f"Deleted {len(ids_to_delete)} vectors for repo: {repo_id}")
         return True
     except Exception as e:
-        print(f"Pinecone deletion error :{e}")
+        print(f"Pinecone deletion error: {e}")
         return False

@@ -24,15 +24,8 @@ def health_check():
 
 @app.delete("/delete/{repo_id}")
 def delete_reviews(repo_id: str):
-    success: delete_repo_reviews(repo_id)
-
-
-@app.delete("/delete/{repo_id}")
-async def delete_repo_data(repo_id: str):
-    try:
-        index.delete(filter={"repo_id": repo_id})
-        print(f"Vectors for {repo_id} deleted.")
+    success = delete_repo_reviews(repo_id)
+    if success:
         return {"status": "success"}
-    except Exception as e:
-        print(f"Error during delete: {e}")
-        return {"status": "error", "message": str(e)}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to delete vectors")

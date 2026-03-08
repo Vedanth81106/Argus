@@ -13,6 +13,11 @@ export default function useSearch(query, type, username){
             return;
         }
 
+        // prevent usage if user puts in url
+        if (query.includes("github.com") || query.includes("http")) {
+            return;
+        }
+
         const delayDebounceFunction = setTimeout(async () => {
             setIsLoading(true);
             try {
