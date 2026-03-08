@@ -17,6 +17,7 @@ class ReviewResponse(BaseModel):
 client = genai.Client(api_key=os.getenv("gemini_api_key"))
 
 def get_ai_review(context: str, past_reviews: list) -> ReviewResponse:
+
     '''
     context_history = ""
     if past_reviews:

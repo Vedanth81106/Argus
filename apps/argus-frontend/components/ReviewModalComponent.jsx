@@ -7,6 +7,22 @@ export default function ReviewModalComponent({ commitSha, repoId }) {
     const [loading, setLoading] = useState(true);
     const eventSourceRef = useRef(null);
 
+    const handleReAudit = async() => {
+        setLoading(true);
+
+        try{
+            const response = await fetch(`/api/reviews/${commitSha}/re-audit`,{
+                method: 'PUT'
+            });
+
+            if(response.ok) fetchReview();
+        }catch(error){
+            console.log("Failed to re-audit commit: " + error);
+            setLoading(false);
+            return;
+        }
+    }
+
     useEffect(() => {
         let active = true;
 
@@ -70,11 +86,20 @@ export default function ReviewModalComponent({ commitSha, repoId }) {
     }, [commitSha, repoId]);
 
     // UI
-    if (loading) return <div className="animate-pulse p-6">Analyzing commit...</div>;
-    if (!review) return <div className="p-6 text-red-400">Review not found</div>;
+    if (loading) return <div className="animate-pulse p-6 accent-primary-foreground">Analyzing commit...</div>;
+    if (!review) return <div className="p-6 text-primary">Review not found</div>;
 
     return (
-        <div className="space-y-6 p-6 text-sm">
+        
+        <div className="space-y-6 p-6 text-sm ">
+
+            <button
+                onClick={handleReAudit}
+                className="cursor-pointer mt-4 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg transition-colors h-10 w-30 text-bold"
+            >
+                Audit Again
+            </button>
+
             <h2 className="text-xl font-semibold">
                 Score: <span className="text-primary">{review.score}/10</span>
             </h2>

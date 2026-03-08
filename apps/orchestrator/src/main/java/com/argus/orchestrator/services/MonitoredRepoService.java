@@ -10,8 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
@@ -114,6 +117,23 @@ public class MonitoredRepoService {
         GHCommit commit = repository.getCommit(commitSha);
 
         sendJob(repo, commit);
+    }
+
+    public ResponseEntity<CodeReview> reAudit(@PathVariable String sha) throws IOException {
+
+        CodeReview review = codeReviewRepository.findFirstByCommitShaOrderByCreatedAtDesc(sha)
+                .orElseThrow(() -> new NoSuchElementException("Code review does not exist"));
+
+        review.setScore(0);
+        review.setSummary("Re-evaluating code");
+        review.setLogicErrors("Re-evaluating code");
+        review.setPerformanceBottlenecks("Re-evaluating code");
+        review.setSecurityVulnerabilities("Re-evaluating code");
+
+        codeReviewRepository.save(review);
+        triggerManualAudit(UUID.fromString(review.getRepoId()), sha);
+
+        return ResponseEntity.ok(review);
     }
 
     private void updateRepo(MonitoredRepo repo, String newSha) {
