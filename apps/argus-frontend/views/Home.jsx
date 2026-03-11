@@ -2,13 +2,11 @@
 
 import React from "react";
 import { SparklesCore } from "@/components/ui/sparkles";
-import Navbar from "@/components/ui/Navbar";
 
 const Home = ({onStart}) => {
     return (
         <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
 
-            <Navbar />
             <SparklesCore
                 id="sparkles"
                 className="absolute inset-0"

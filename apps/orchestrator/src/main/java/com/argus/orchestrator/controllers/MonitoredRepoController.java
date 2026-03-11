@@ -28,7 +28,6 @@ public class MonitoredRepoController {
 
     private final MonitoredRepoService monitoredRepoService;
     private final GithubService githubService;
-    private final MonitoredRepoRepository monitoredRepoRepository;
 
     @PostMapping("/repos/add")
     @ResponseStatus(HttpStatus.CREATED)
@@ -54,7 +53,7 @@ public class MonitoredRepoController {
 
     @PostMapping("/repos/{id}/audit/{sha}")
     public ResponseEntity<String> auditCommit(@PathVariable UUID id, @PathVariable String sha) throws IOException {
-        monitoredRepoService.triggerManualAudit(id, sha);
+        monitoredRepoService.triggerManualAudit(id, sha, true);
         return ResponseEntity.ok("Audit job queued for commit: " + sha);
     }
 

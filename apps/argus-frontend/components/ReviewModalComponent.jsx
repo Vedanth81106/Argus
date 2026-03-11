@@ -1,13 +1,71 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import {useEffect, useState, useRef, useCallback} from "react";
 
 export default function ReviewModalComponent({ commitSha, repoId }) {
     const [review, setReview] = useState(null);
     const [loading, setLoading] = useState(true);
     const eventSourceRef = useRef(null);
 
+    const fetchReview = useCallback(async (isActive) => {
+
+        try {
+
+            // check if it exists in the db first
+            const check = await fetch(`/api/reviews/${commitSha}`);
+            if (check.ok) {
+                const data = await check.json();
+                if (!isActive) return;
+
+                // if AI is done reviewing, show it and then return
+                if (data.score > 0) {
+                    setReview(data);
+                    setLoading(false);
+                    return;
+                }
+                setReview(data);
+            }
+
+            // wait for sometime and then start listening (so that java has time to open the tunnel)
+            await new Promise(resolve => setTimeout(resolve, 500));
+            if (!isActive) return;
+
+            if (eventSourceRef.current) eventSourceRef.current.close();
+
+            console.log("Opening SSE for SHA:", commitSha);
+            const sse = new EventSource(`http://localhost:8080/api/stream/reviews/${commitSha}`);
+            eventSourceRef.current = sse;
+
+            // listen for the event
+            sse.addEventListener("review-result", (event) => {
+                if (!isActive) return;
+                console.log("AI Result Received via SSE!");
+                const data = JSON.parse(event.data);
+
+                setReview(data);
+                setLoading(false);
+                sse.close();
+            });
+
+            sse.onerror = (err) => {
+                console.error("SSE error occurred:", err);
+                if (eventSourceRef.current) {
+                    eventSourceRef.current.close();
+                }
+            };
+
+        } catch (error) {
+            console.error("Failed to initiate audit UI:", error);
+        }
+
+    },[commitSha])
+
     const handleReAudit = async() => {
+        // force close sse connection ifalready open
+        if (eventSourceRef.current) {
+            eventSourceRef.current.close();
+            eventSourceRef.current = null;
+        }
         setLoading(true);
 
         try{
@@ -15,7 +73,12 @@ export default function ReviewModalComponent({ commitSha, repoId }) {
                 method: 'PUT'
             });
 
-            if(response.ok) fetchReview();
+            if (response.ok) {
+                // delay for java to clear old emitrer
+                setTimeout(() => {
+                    fetchReview(true);
+                }, 300);
+            }
         }catch(error){
             console.log("Failed to re-audit commit: " + error);
             setLoading(false);
@@ -25,72 +88,19 @@ export default function ReviewModalComponent({ commitSha, repoId }) {
 
     useEffect(() => {
         let active = true;
-
-        const fetchReview = async () => {
-            try {
-
-                // check if it exists in the db first
-                const check = await fetch(`/api/reviews/${commitSha}`);
-                if (check.ok) {
-                    const data = await check.json();
-                    if (!active) return;
-
-                    // if AI is done reviewing, show it and then return
-                    if (data.score > 0) {
-                        setReview(data);
-                        setLoading(false);
-                        return;
-                    }
-                    setReview(data);
-                }
-
-                // wait for sometime and then start listening (so that java has time to open the tunnel)
-                await new Promise(resolve => setTimeout(resolve, 500));
-                if (!active) return;
-
-                console.log("Opening SSE for SHA:", commitSha);
-                const sse = new EventSource(`http://localhost:8080/api/stream/reviews/${commitSha}`);
-                eventSourceRef.current = sse;
-
-                // listen for the event
-                sse.addEventListener("review-result", (event) => {
-                    if (!active) return;
-                    console.log("🎯 AI Result Received via SSE!");
-                    const data = JSON.parse(event.data);
-
-                    setReview(data);
-                    setLoading(false);
-                    sse.close();
-                });
-
-                sse.onerror = (err) => {
-                    console.error("SSE error occurred:", err);
-                    if (eventSourceRef.current) {
-                        eventSourceRef.current.close();
-                    }
-                };
-
-            } catch (error) {
-                console.error("Failed to initiate audit UI:", error);
-            }
-        };
-
-        fetchReview();
-
+        fetchReview(active);
         return () => {
             active = false;
-            if (eventSourceRef.current) {
-                eventSourceRef.current.close();
-            }
+            if (eventSourceRef.current) eventSourceRef.current.close();
         };
-    }, [commitSha, repoId]);
+    }, [fetchReview]);
 
     // UI
     if (loading) return <div className="animate-pulse p-6 accent-primary-foreground">Analyzing commit...</div>;
     if (!review) return <div className="p-6 text-primary">Review not found</div>;
 
     return (
-        
+
         <div className="space-y-6 p-6 text-sm ">
 
             <button

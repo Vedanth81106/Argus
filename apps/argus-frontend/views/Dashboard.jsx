@@ -3,10 +3,12 @@
 import React, {useEffect, useState} from 'react';
 import AddNewRepoModal from '../components/AddNewRepoModal.jsx';
 import MonitoredRepositoryComponent from "../components/MonitoredRepositoryComponent.jsx";
+import { SparklesCore } from "@/components/ui/sparkles";
+import AddButton from "@/components/ui/AddButton";
 
-export default function(){
+export default function RepositoryDashboard() {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [repos, setRepos] = useState([]); // Array of connected repos
+    const [repos, setRepos] = useState([]);
 
     useEffect(() => {
         const fetchSavedRepos = async () => {
@@ -20,36 +22,63 @@ export default function(){
                 console.error("Failed to load monitors:", error);
             }
         };
-
         fetchSavedRepos();
     }, []);
 
     return (
-        <div className="relative min-h-screen bg-[#020617] text-white p-8 font-atkins">
-            {/* top left plus */}
-            <button
-                onClick={() => setIsModalOpen(true)}
-                className="fixed top-8 left-8 w-15 h-15 rounded-xl bg-blue-300 text-black font-bold hover:bg-[#020617] hover:text-white ease-in-out cursor-pointer
-                flex items-center justify-center text-2xl transition-all active:scale-95 duration-700 hover:scale-150"
-            >
-                +
-            </button>
+        <div className="relative min-h-screen overflow-hidden bg-background text-foreground p-8 font-space">
 
-            {/* center stage */}
-            <main className="max-w-6xl mx-auto mt-20 h-[60vh] flex items-center justify-center">
+            {/* Background Sparkles */}
+            <div className="absolute inset-0 w-full h-full">
+                <SparklesCore
+                    id="dashboard-sparkles"
+                    background="transparent"
+                    minSize={1.0}
+                    maxSize={3.0}
+                    particleDensity={100}
+                    className="w-full h-full"
+                    particleColor="secondary"
+                    speed={0.2}
+                />
+            </div>
+
+            {/* Corrected Radial Gradient Syntax for Tailwind v4/v3 arbitrary values */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,var(--background)_100%)] pointer-events-none" />
+
+            <div className="relative z-20">
+                <AddButton onClick={() => setIsModalOpen(true)} text={"Add Repository"} />
+            </div>
+
+            {/* Main Content Area: Use min-h-screen or a larger min-h to ensure centering in the viewport */}
+            <main className="relative z-10 max-w-7xl mx-auto flex flex-col items-center justify-center min-h-[75vh]">
                 {repos.length === 0 ? (
-                    <div className="w-full h-full border-2 border-dashed border-ternary rounded-3xl flex flex-col items-center justify-center text-gray-500">
-                        <div className="text-4xl mb-4 opacity-20"></div>
-                        <p className="tracking-widest uppercase text-[11px] font-bold">No Repositories Observed</p>
+                    <div className="w-full max-w-3xl aspect-video rounded-3xl flex flex-col items-center justify-center">
+
+                        {/* Empty State Visual */}
+                        <div className="mb-8 relative">
+                            <div className="relative w-16 h-16 border-2 border-dashed border-ternary/50 rounded-full flex items-center justify-center animate-[spin_10s_linear_infinite]">
+                                <div className="w-2 h-2 bg-ternary rounded-full" />
+                            </div>
+                        </div>
+
+                        <h2 className="text-2xl font-bold text-white mb-8">
+                            No Repositories Observed
+                        </h2>
+
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            className="mt-6 text-blue-400 hover:text-blue-300 text-sm transition-colors"
+                            className="duration-700 group relative -skew-x-12 border border-white/10 bg-black px-8 py-3 transition-all hover:bg-white hover:text-black active:scale-95"
                         >
-                            + Initialize First Monitor
+                            <span className="cursor-pointer inline-block skew-x-12 text-sm font-bold uppercase tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-secondary via-primary to-ternary">
+                                Initialize First Monitor
+                            </span>
                         </button>
                     </div>
                 ) : (
-                    <MonitoredRepositoryComponent repos ={repos} setRepos={setRepos} />
+                    /* 🔥 Centering Fix: Ensure w-full and proper flex alignment */
+                    <div className="w-full flex justify-center items-center animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                        <MonitoredRepositoryComponent repos={repos} setRepos={setRepos}/>
+                    </div>
                 )}
             </main>
 
@@ -62,4 +91,3 @@ export default function(){
         </div>
     );
 };
-

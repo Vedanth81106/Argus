@@ -11,4 +11,5 @@ public interface CodeReviewRepository extends JpaRepository<CodeReview, UUID> {
     List<CodeReview> findByRepoIdOrderByCreatedAtDesc(String repoId);
     Optional<CodeReview> findFirstByCommitShaOrderByCreatedAtDesc(String commitSha);
     boolean existsByCommitSha(String commitSha);
+    void deleteByCommitSha(String commitSha);
 }

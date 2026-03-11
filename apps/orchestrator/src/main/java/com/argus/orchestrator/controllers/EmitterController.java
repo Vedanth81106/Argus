@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RestController
 @RequestMapping("/api/stream")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class EmitterController {
 
     private final SseService sseService;
@@ -31,7 +31,6 @@ public class EmitterController {
 
         emitter.onCompletion(() -> sseService.removeEmitter(sha));
         emitter.onTimeout(() -> sseService.removeEmitter(sha));
-        emitter.onCompletion(() -> sseService.removeEmitter(sha));
 
         return emitter;
     }

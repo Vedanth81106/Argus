@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
@@ -57,7 +56,7 @@ public class MonitoredRepoService {
         String latestCommitSha = currentCommit.getSHA1();
 
         if(latestCommitSha != null && !latestCommitSha.equals(repo.getLastCommitSha())){ // latest SHA vs database ka SHA
-            sendJob(repo, currentCommit);
+            sendJob(repo, currentCommit, false);
         }
 
         updateRepo(repo, latestCommitSha);
@@ -80,12 +79,19 @@ public class MonitoredRepoService {
         }
     }
 
-    public void sendJob(MonitoredRepo repo, GHCommit commit) throws IOException {
+    @Transactional
+    public void sendJob(MonitoredRepo repo, GHCommit commit, boolean isReAudit) throws IOException {
 
         String commitSha = commit.getSHA1();
+
         if(codeReviewRepository.existsByCommitSha(commitSha)){
-            System.out.println("Skipping review: Review for " + commitSha + "already exists!");
-            return;
+            if(!isReAudit){
+                System.out.println("Skipping review: Review for " + commitSha + " already exists!");
+                return;
+            }
+
+            System.out.println("Re-auditing for the commit SHA: " + commitSha);
+            codeReviewRepository.deleteByCommitSha(commitSha);
         }
 
         CodeReview pendingReview = new CodeReview();
@@ -109,29 +115,24 @@ public class MonitoredRepoService {
 
     }
 
-    public void triggerManualAudit(UUID repoId, String commitSha) throws IOException {
+    @Transactional
+    public void triggerManualAudit(UUID repoId, String commitSha, boolean isReudit) throws IOException {
         MonitoredRepo repo = monitoredRepoRepository.findById(repoId)
                 .orElseThrow(() -> new NoSuchElementException("Repo not found"));
 
         GHRepository repository = githubService.getGHRepository(repo);
         GHCommit commit = repository.getCommit(commitSha);
 
-        sendJob(repo, commit);
+        sendJob(repo, commit,isReudit);
     }
 
+    @Transactional
     public ResponseEntity<CodeReview> reAudit(@PathVariable String sha) throws IOException {
 
         CodeReview review = codeReviewRepository.findFirstByCommitShaOrderByCreatedAtDesc(sha)
                 .orElseThrow(() -> new NoSuchElementException("Code review does not exist"));
 
-        review.setScore(0);
-        review.setSummary("Re-evaluating code");
-        review.setLogicErrors("Re-evaluating code");
-        review.setPerformanceBottlenecks("Re-evaluating code");
-        review.setSecurityVulnerabilities("Re-evaluating code");
-
-        codeReviewRepository.save(review);
-        triggerManualAudit(UUID.fromString(review.getRepoId()), sha);
+        triggerManualAudit(UUID.fromString(review.getRepoId()), sha, true);
 
         return ResponseEntity.ok(review);
     }

@@ -1,4 +1,5 @@
 from google import genai
+from google.genai import types
 import os
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -18,7 +19,7 @@ client = genai.Client(api_key=os.getenv("gemini_api_key"))
 
 def get_ai_review(context: str, past_reviews: list) -> ReviewResponse:
 
-    '''
+
     context_history = ""
     if past_reviews:
         context_history = " Similar past reviews for this context: "
@@ -50,36 +51,23 @@ def get_ai_review(context: str, past_reviews: list) -> ReviewResponse:
 
     try:
         response = client.models.generate_content(
-            model="gemini-3.1-flash-lite",
+            model="gemini-3.1-flash-lite-preview",
             contents=f"Please review this commit: \n{context}",
-            config={
-                "system_instruction": SYSTEM_PROMPT,
-                "response_mime_type": "application/json",
-                "response_schema": ReviewResponse,
-            }
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                response_mime_type="application/json",
+                response_schema=ReviewResponse,
+            )
         )
 
-        return response.parsed
+        return response.parsed.model_dump()
 
     except Exception as e:
         print(f"AI Review failed: {e}")
-        return {
-            "summary": f"Error: {str(e)}",
-            "logic_errors": "N/A",
-            "security_vulnerabilities": "N/A",
-            "performance_bottlenecks": "N/A",
-            "score": 0
-        }
-    '''
-
-    print("Mock mode")
-    time.sleep(3)
-
-    return {
-        "score": 8,
-        "summary": "MOCK: Your code is clean, but consider adding more comments to the service layer.",
-        "logic_errors": "None detected.",
-        "security_vulnerabilities": "Potential for SQL injection on line 42 (Simulated).",
-        "performance_bottlenecks": "Loop on line 12 could be optimized.",
-
-    }
+        return ReviewResponse(
+            summary=f"Error: {str(e)}",
+            logic_errors="N/A",
+            security_vulnerabilities="N/A",
+            performance_bottlenecks="N/A",
+            score=0
+        )

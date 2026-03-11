@@ -1,11 +1,10 @@
 import "./globals.css";
-import Navbar from "@/components/ui/Navbar";
 
 export const metadata = {
     title: "Argus",
     description: "AI-Powered Repository Monitor",
     icons: {
-        icon: "/eye.svg",
+        icon: "/tree.svg",
     },
 };
 
@@ -24,7 +23,6 @@ export default function RootLayout({ children }) {
             />
         </head>
         <body className="antialiased bg-background text-foreground">
-        <Navbar></Navbar>
         {children}
         </body>
         </html>
