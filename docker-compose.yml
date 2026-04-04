@@ -86,7 +86,6 @@ services:
       - spring
     networks:
       - argus-network
-
 networks:
   argus-network:
     driver: bridge

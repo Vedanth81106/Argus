@@ -4,6 +4,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #0a0f2e inset !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  caret-color: #f8fafc;
+}
+
 @theme {
   --font-space: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-cinzel: "Cinzel";

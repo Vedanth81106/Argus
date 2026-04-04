@@ -1,5 +1,7 @@
 import "./globals.css";
-import { ClerkProvider } from '@clerk/nextjs'
+// Remove ClerkProvider and dark imports here if they are already inside ClerkModal.jsx
+import ClerkModal from "../components/ui/ClerkModal.jsx";
+
 export const metadata = {
     title: "Argus",
     description: "AI-Powered Repository Monitor",
@@ -9,25 +11,21 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-    console.log("Clerk key:", process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
     return (
-        <ClerkProvider>
-            <html lang="en">
-            <head>
-                {/* Google Fonts Preconnect */}
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-
-                {/* Combined Google Font Links */}
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Cinzel:wght@400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
-                    rel="stylesheet"
-                />
-            </head>
-            <body className="antialiased bg-background text-foreground">
+        <html lang="en">
+        <head>
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+            <link
+                href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Cinzel:wght@400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+                rel="stylesheet"
+            />
+        </head>
+        <body className="antialiased bg-background text-foreground">
+        <ClerkModal>
             {children}
-            </body>
-            </html>
-        </ClerkProvider>
+        </ClerkModal>
+        </body>
+        </html>
     );
 }
