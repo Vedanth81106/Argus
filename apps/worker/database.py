@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-pc = Pinecone(api_key=os.getenv("pinecone_api_key"))
+pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 
 # connect to pinecone index
 index = pc.Index("code-reviews")

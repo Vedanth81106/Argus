@@ -5,6 +5,7 @@ from reviewer import get_ai_review
 from messenger import send_ai_feedback
 from vectorizer import get_code_embedding
 from database import query_similar_reviews, upsert_review
+import os
 
 def process_job(ch, method, properties, body, results_channel):
 
@@ -18,7 +19,7 @@ def process_job(ch, method, properties, body, results_channel):
         print(f"Repo ID: {repo_id}")
         print(f"Commit: {commit_sha}")
 
-        # Files to ignore (don't waste AI tokens on these)
+        # Files to ignore
         IGNORE_LIST = ['package-lock.json', 'yarn.lock', 'pom.xml', '.gitignore', '.log']
 
         # We will collect all file reviews into this string
@@ -81,9 +82,23 @@ def process_job(ch, method, properties, body, results_channel):
 
 def start_worker():
 
-    # connection to RabbitMQ assuming its on localhost with default credentials
+    # Get connection details from Environment Variables (set by Docker)
+    RABBIT_HOST = os.getenv('RABBITMQ_HOST', 'localhost')
+    RABBIT_USER = os.getenv('RABBIT_USER', 'guest')
+    RABBIT_PASS = os.getenv('RABBIT_PASS', 'guest')
+
+    credentials = pika.PlainCredentials(RABBIT_USER, RABBIT_PASS)
+
+    # connection to RabbitMQ
     # blocking = it will wait and hold the thread until a message is received
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    connection = pika.BlockingConnection(
+            pika.ConnectionParameters(
+                host=RABBIT_HOST,
+                credentials=credentials,
+                heartbeat=600,      # keeps connection alive during long AI tasks
+                blocked_connection_timeout=300
+            )
+        )
 
     # we work with the channel and not the connection directly,
     # the channel is the medium through which we send and receive messages
@@ -115,3 +130,9 @@ def start_worker():
 
     #starts an infinite loop that waits for messages and calls the callback function when a message is received
     consume_channel.start_consuming()
+
+if __name__ == "__main__":
+    try:
+        start_worker()
+    except KeyboardInterrupt:
+        print("Worker stopped manually.")

@@ -4,19 +4,19 @@ from dotenv import load_dotenv
 from reviewer import get_ai_review
 from database import delete_repo_reviews
 from consumer import start_worker
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
 app = FastAPI(title = "Argus AI worker")
 
-# auto run this function when the app starts
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Connecting to RabbitMQ and Pinecone...")
+    yield
+    print("Closing connections...")
 
-    # we run start_worker method in a separate thread
-    # because it is an infinite loop and will block normal execution
-    thread = threading.Thread(target=start_worker, daemon = True) # daemon true = thread stops when server/app stops
-    thread.start()
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/health")
 def health_check():
@@ -29,3 +29,7 @@ def delete_reviews(repo_id: str):
         return {"status": "success"}
     else:
         raise HTTPException(status_code=500, detail="Failed to delete vectors")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

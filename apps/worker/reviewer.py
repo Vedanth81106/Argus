@@ -15,7 +15,7 @@ class ReviewResponse(BaseModel):
     performance_bottlenecks: str
     score: int
 
-client = genai.Client(api_key=os.getenv("gemini_api_key"))
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def get_ai_review(context: str, past_reviews: list) -> ReviewResponse:
 

@@ -1,10 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async rewrites() {
+    // Fallback to localhost if the env var isn't set (for local dev outside Docker)
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8080/api/:path*', // Proxy to Java
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },

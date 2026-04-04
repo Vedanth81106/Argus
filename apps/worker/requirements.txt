@@ -4,3 +4,4 @@ pika
 python-dotenv
 google-genai
 pydantic
+pinecone
