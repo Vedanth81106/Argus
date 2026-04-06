@@ -103,12 +103,12 @@ export default function ReviewModalComponent({ commitSha, repoId }) {
 
         <div className="space-y-6 p-6 text-sm ">
 
-            <button
+            {/*<button
                 onClick={handleReAudit}
                 className="cursor-pointer mt-4 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg transition-colors h-10 w-30 text-bold"
             >
                 Audit Again
-            </button>
+            </button>*/}
 
             <h2 className="text-xl font-semibold">
                 Score: <span className="text-primary">{review.score}/10</span>

@@ -6,7 +6,7 @@ import { SignInButton, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
 const Home = () => {
-    const { isSignedIn } = useUser();
+    const { isSignedIn } = useUser();1
     const router = useRouter();
 
     return (

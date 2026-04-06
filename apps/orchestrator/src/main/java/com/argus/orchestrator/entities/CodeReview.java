@@ -36,7 +36,7 @@ public class CodeReview {
     @Column(columnDefinition = "TEXT")
     private String securityVulnerabilities;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne

@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import {HoverBorderGradient} from "@/components/ui/HoverBorderGradient";
-import{ useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function MonitoredRepositoryComponent({repos, setRepos}) {
 
@@ -31,73 +31,91 @@ export default function MonitoredRepositoryComponent({repos, setRepos}) {
         return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    return (<div className="min-h-screen w-full flex items-center justify-center p-6 bg-background">
-        <div className="flex flex-col gap-6 w-full max-w-4xl">
+    const getStatusColor = (status) => {
+        if (!status) return "text-gray-400";
+        switch(status) {
+            case "ACTIVE": return "text-green-400";
+            case "ERROR": return "text-red-400";
+            case "PENDING": return "text-yellow-400";
+            default: return "text-gray-400";
+        }
+    };
 
-            {repos.map((repo) => (
-                <div key={repo.id}
-                     onClick={() => {router.push(`/dashboard/${repo.id}/history`)}}
-                     className="-skew-x-12 will-change-transform cursor-pointer">
-                    <HoverBorderGradient
-                        containerClassName="w-full rounded-none"
-                        className="rounded-none bg-black/40 backdrop-blur-xl h-24 flex items-center "
-                    >
-                        <div className="skew-x-12 flex justify-between items-center w-full px-8">
+    return (
+        <div className="min-h-screen w-full flex items-center justify-center p-6 bg-background">
+            <div className="flex flex-col gap-6 w-full max-w-4xl">
+                {repos.map((repo) => (
+                    <div key={repo.id}
+                         onClick={() => router.push(`/dashboard/${repo.id}/history`)}
+                         className="-skew-x-12 will-change-transform cursor-pointer">
+                        <HoverBorderGradient
+                            containerClassName="w-full rounded-none"
+                            className="rounded-none bg-black/40 backdrop-blur-xl h-24 flex items-center"
+                        >
+                            <div className="skew-x-12 flex justify-between items-center w-full px-8">
 
-                            {/* Left: Identity */}
-                            <div className="flex items-center gap-6">
-                                <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-white/10">
-                                    <img
-                                        src={repo.avatarUrl}
-                                        alt={repo.repositoryName}
-                                        className="object-cover w-full h-full"
-                                    />
-                                </div>
+                                {/* Left: Identity */}
+                                <div className="flex items-center gap-6">
+                                    <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-white/10">
+                                        <img
+                                            src={repo.avatarUrl}
+                                            alt={repo.repositoryName}
+                                            className="object-cover w-full h-full"
+                                        />
+                                    </div>
 
-                                <div className="flex flex-col gap-1 text-left">
+                                    <div className="flex flex-col gap-1 text-left">
                                         <span className="text-[10px] text-gray-500 uppercase tracking-[0.3em] font-bold">
-                                          {repo.owner}
+                                            {repo.owner}
                                         </span>
-                                    <span className="text-xl font-semibold text-white tracking-tight">
-                                          {repo.repositoryName}
+                                        <span className="text-xl font-semibold text-white tracking-tight">
+                                            {repo.repositoryName}
                                         </span>
+                                        <span className="text-[9px] text-gray-600 uppercase tracking-widest">
+                                            {repo.branch}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Center stuff */}
-                            <div className="hidden md:flex items-center gap-12 text-gray-500">
-                                <div className="flex flex-col items-start">
-                                    <span className="text-[9px] uppercase tracking-widest text-gray-600">Health</span>
-                                    <span className="text-sm font-medium text-gray-300">98%</span>
-                                </div>
-                                <div className="flex flex-col items-start">
-                                    <span className="text-[9px] uppercase tracking-widest text-gray-600">Last Scan</span>
-                                    <span className="text-xs font-medium text-gray-300">
+                                {/* Center: Stats */}
+                                <div className="hidden md:flex items-center gap-12 text-gray-500">
+                                    <div className="flex flex-col items-start">
+                                        <span className="text-[9px] uppercase tracking-widest text-gray-600">Last Scan</span>
+                                        <span className="text-xs font-medium text-gray-300">
                                             {formatTime(repo.lastPolledAt)}
-                                    </span>
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col items-start">
+                                        <span className="text-[9px] uppercase tracking-widest text-gray-600">Created</span>
+                                        <span className="text-xs font-medium text-gray-300">
+                                            {formatTime(repo.createTime)}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col items-start">
+                                        <span className="text-[9px] uppercase tracking-widest text-gray-600">Last Commit</span>
+                                        <span className="text-xs font-mono text-gray-300">
+                                            {repo.lastCommitSha
+                                                ? repo.lastCommitSha.substring(0, 7)
+                                                : "None"}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col items-start">
-                                    <span
-                                        className="text-[9px] uppercase tracking-widest text-gray-600">Last Audit</span>
-                                    <span className="text-sm font-medium text-gray-300">2m ago</span>
-                                </div>
+
+                                {/* Right: Actions */}
+                                <button
+                                    className="w-9 h-9 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center text-2xl relative z-50 cursor-pointer shadow-lg hover:shadow-red-500/40"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRepoDelete(repo);
+                                    }}
+                                >
+                                    −
+                                </button>
                             </div>
-
-                            {/* Right: Actions */}
-                            <button
-                                className="w-9 h-9 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center text-2xl relative z-50 cursor-pointer shadow-lg hover:shadow-red-500/40"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRepoDelete(repo);
-                                }}
-                            >
-                                −
-                            </button>
-                        </div>
-                    </HoverBorderGradient>
-                </div>
-            ))}
-
+                        </HoverBorderGradient>
+                    </div>
+                ))}
+            </div>
         </div>
-    </div>);
+    );
 }

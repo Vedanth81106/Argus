@@ -1,6 +1,7 @@
 import pika
 import json
 import asyncio
+import time
 from reviewer import get_ai_review
 from messenger import send_ai_feedback
 from vectorizer import get_code_embedding
@@ -56,13 +57,12 @@ def process_job(ch, method, properties, body, results_channel):
             ai_response = get_ai_review(full_commit_context, past_reviews)
 
             if vector and ai_response:
-                if vector and ai_response:
-                    if isinstance(ai_response, dict):
-                        metadata = ai_response.copy()
-                    else:
-                        metadata = ai_response.model_dump()
-                    metadata["repo_id"] = str(repo_id)
-                    upsert_review(commit_sha, vector, metadata)
+                if isinstance(ai_response, dict):
+                    metadata = ai_response.copy()
+                else:
+                    metadata = ai_response.model_dump()
+                metadata["repo_id"] = str(repo_id)
+                upsert_review(commit_sha, vector, metadata)
 
             send_ai_feedback(repo_id, commit_sha, ai_response, results_channel)
             # send the ai response back to java
@@ -83,22 +83,27 @@ def process_job(ch, method, properties, body, results_channel):
 def start_worker():
 
     # Get connection details from Environment Variables (set by Docker)
-    RABBIT_HOST = os.getenv('RABBITMQ_HOST', 'localhost')
+    RABBIT_HOST = os.getenv('RABBITMQ_HOST', 'rabbitmq') # changed default to rabbitmq for docker
     RABBIT_USER = os.getenv('RABBIT_USER', 'guest')
     RABBIT_PASS = os.getenv('RABBIT_PASS', 'guest')
 
     credentials = pika.PlainCredentials(RABBIT_USER, RABBIT_PASS)
 
-    # connection to RabbitMQ
-    # blocking = it will wait and hold the thread until a message is received
-    connection = pika.BlockingConnection(
-            pika.ConnectionParameters(
-                host=RABBIT_HOST,
-                credentials=credentials,
-                heartbeat=600,      # keeps connection alive during long AI tasks
-                blocked_connection_timeout=300
-            )
-        )
+    # connection to RabbitMQ with retry
+    for i in range(10):
+        try:
+            connection = pika.BlockingConnection(
+                    pika.ConnectionParameters(
+                        host=RABBIT_HOST,
+                        credentials=credentials,
+                        heartbeat=600,      # keeps connection alive during long AI tasks
+                        blocked_connection_timeout=300
+                    )
+                )
+            break
+        except pika.exceptions.AMQPConnectionError:
+            print(f"RabbitMQ not ready, retrying ({i+1}/10)...")
+            time.sleep(5)
 
     # we work with the channel and not the connection directly,
     # the channel is the medium through which we send and receive messages

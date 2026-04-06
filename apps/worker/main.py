@@ -1,5 +1,5 @@
 import threading
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from dotenv import load_dotenv
 from reviewer import get_ai_review
 from database import delete_repo_reviews
@@ -8,15 +8,16 @@ from contextlib import asynccontextmanager
 
 load_dotenv()
 
-app = FastAPI(title = "Argus AI worker")
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Connecting to RabbitMQ and Pinecone...")
+    # start the rabbitmq consumer in a separate thread so it doesn't block fastapi
+    worker_thread = threading.Thread(target=start_worker, daemon=True)
+    worker_thread.start()
     yield
     print("Closing connections...")
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(title = "Argus AI worker", lifespan=lifespan)
 
 @app.get("/health")
 def health_check():

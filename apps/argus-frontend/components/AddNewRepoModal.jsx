@@ -92,23 +92,28 @@ const AddNewRepoModal = ({onClose, onAdd}) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="w-full max-w-md bg-[#0a0f1e] border border-white/10 rounded-3xl p-8 shadow-2xl">
+            <div className="w-full max-w-md bg-[#020617] border border-secondary/30 rounded-none p-8 shadow-2xl"
+                 style={{ boxShadow: "0 0 60px rgba(124, 58, 237, 0.15)" }}>
+
+                {/* Step Progress */}
                 <div className="flex gap-2 mb-8">
-                    <div className={`h-1 flex-1 rounded-full ${step >= 1 ? 'bg-blue-500' : 'bg-white/10'}`}/>
-                    <div className={`h-1 flex-1 rounded-full ${step >= 2 ? 'bg-blue-500' : 'bg-white/10'}`}/>
+                    <div className={`h-[2px] flex-1 transition-all duration-500 ${step >= 1 ? 'bg-primary' : 'bg-white/10'}`}/>
+                    <div className={`h-[2px] flex-1 transition-all duration-500 ${step >= 2 ? 'bg-primary' : 'bg-white/10'}`}/>
                 </div>
 
-                <h2 className="text-2xl font-bold mb-2">
+                {/* Header */}
+                <h2 className="text-2xl font-cinzel font-bold mb-2 bg-clip-text text-transparent bg-linear-to-r from-secondary via-primary to-ternary">
                     {step === 1 ? "Target Username" : "Select Repository"}
                 </h2>
-                <p className="text-gray-500 text-sm mb-8 font-atkins">
+                <p className="text-gray-500 text-sm mb-8 font-space">
                     {step === 1 ? "Enter the GitHub handle to scan." : `Searching ${formData.username}'s stack...`}
                 </p>
 
+                {/* Input */}
                 <div className="relative mb-6">
                     <input
                         autoFocus
-                        className="w-full bg-transparent border-b border-white/20 pb-2 text-xl outline-none focus:border-blue-500 transition-colors text-white font-atkins"
+                        className="w-full bg-transparent border-b border-white/20 pb-2 text-xl outline-none focus:border-primary transition-colors text-white font-space"
                         placeholder={step === 1 ? "e.g. octocat" : "e.g. Hello-World"}
                         value={currentQuery}
                         onChange={(e) => setFormData({
@@ -118,41 +123,46 @@ const AddNewRepoModal = ({onClose, onAdd}) => {
                     />
                 </div>
 
+                {/* Results */}
                 <div className="max-h-48 overflow-y-auto mb-8 space-y-2 custom-scrollbar">
-                    {isLoading && <div className="text-blue-400 text-sm animate-pulse p-2">Scanning GitHub...</div>}
-
+                    {isLoading && (
+                        <div className="text-ternary text-sm animate-pulse p-2 font-space tracking-widest uppercase text-xs">
+                            Scanning GitHub...
+                        </div>
+                    )}
                     {step === 1 && displayResults.map((user) => (
                         <div
                             key={user.username}
                             onClick={() => handleUserSelect(user)}
-                            className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group"
+                            className="flex items-center gap-3 p-2 hover:bg-white/5 cursor-pointer transition-colors group border border-transparent hover:border-secondary/30"
                         >
                             <img src={user.avatarUrl} alt="" className="w-8 h-8 rounded-full border border-white/10"/>
-                            <span className="group-hover:text-blue-400 transition-colors">{user.username}</span>
+                            <span className="group-hover:text-primary transition-colors font-space">{user.username}</span>
                         </div>
                     ))}
-
                     {step === 2 && displayResults
                         .filter(repo => !formData.repoName || repo.toLowerCase().includes(formData.repoName.toLowerCase()))
                         .map((repo) => (
                             <div
                                 key={repo}
-                                onClick={() => { handleRepoSelect(repo) }}
-                                className="p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-white/10 flex justify-between items-center group"
+                                onClick={() => handleRepoSelect(repo)}
+                                className="p-3 hover:bg-white/5 cursor-pointer transition-colors border border-transparent hover:border-secondary/30 flex justify-between items-center group"
                             >
-                                <span className="group-hover:text-blue-400">{repo}</span>
+                                <span className="group-hover:text-primary font-space">📂 {repo}</span>
                             </div>
                         ))}
                 </div>
+
+                {/* Quick Actions */}
                 <div className="mt-8 pt-6 border-t border-white/5">
-                    <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-3 font-bold">
+                    <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-3 font-bold font-space">
                         Quick Actions
                     </p>
                     <div className="relative">
                         <input
                             type="text"
                             placeholder="Or paste GitHub URL here..."
-                            className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-blue-500/50 transition-all font-atkins"
+                            className="w-full bg-white/5 border border-secondary/20 rounded-none p-3 text-sm outline-none focus:border-primary/50 transition-all font-space text-white placeholder:text-gray-600"
                             onChange={handleUrlPaste}
                         />
                         <div className="absolute right-3 top-3 opacity-20 pointer-events-none">
@@ -161,13 +171,22 @@ const AddNewRepoModal = ({onClose, onAdd}) => {
                     </div>
                 </div>
 
+                {/* Footer Buttons */}
                 <div className="flex justify-between items-center pt-10">
-                    <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
+                    <button
+                        onClick={onClose}
+                        className="text-gray-500 hover:text-white transition-colors font-space text-sm uppercase tracking-widest"
+                    >
                         Cancel
                     </button>
                     {step === 2 && (
-                        <button onClick={() => setStep(1)} className="text-sm text-blue-400 hover:underline">
-                            Back to user
+                        <button
+                            onClick={() => setStep(1)}
+                            className="group relative -skew-x-12 border border-secondary/40 bg-black px-4 py-2 transition-all hover:bg-white hover:text-black active:scale-95"
+                        >
+                        <span className="inline-block skew-x-12 text-xs font-bold uppercase tracking-widest text-secondary group-hover:text-black">
+                            ← Back
+                        </span>
                         </button>
                     )}
                 </div>

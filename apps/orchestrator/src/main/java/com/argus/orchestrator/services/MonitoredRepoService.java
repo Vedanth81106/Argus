@@ -81,38 +81,57 @@ public class MonitoredRepoService {
 
     @Transactional
     public void sendJob(MonitoredRepo repo, GHCommit commit, boolean isReAudit) throws IOException {
-
         String commitSha = commit.getSHA1();
 
-        if(codeReviewRepository.existsByCommitSha(commitSha)){
-            if(!isReAudit){
-                System.out.println("Skipping review: Review for " + commitSha + " already exists!");
-                return;
-            }
+        // 1. Find existing or create new
+        CodeReview review = codeReviewRepository.findFirstByCommitShaOrderByCreatedAtDesc(commitSha)
+                .orElseGet(() -> {
+                    CodeReview nr = new CodeReview();
+                    nr.setCommitSha(commitSha);
+                    nr.setMonitoredRepo(repo);
+                    nr.setRepoId(repo.getId().toString());
+                    return nr;
+                });
 
-            System.out.println("Re-auditing for the commit SHA: " + commitSha);
-            codeReviewRepository.deleteByCommitSha(commitSha);
+        // 2. If it's NOT a re-audit and it's already "Done" (has a summary), skip it
+        if (!isReAudit && review.getId() != null && !review.getSummary().equals("AI is currently analyzing this commit...")) {
+            System.out.println("Skipping: Review already exists for " + commitSha);
+            return;
         }
 
-        CodeReview pendingReview = new CodeReview();
-        pendingReview.setCommitSha(commitSha);
-        pendingReview.setRepoId(repo.getId().toString());
-        pendingReview.setCreatedAt(LocalDateTime.now());
-        pendingReview.setMonitoredRepo(repo);
-        pendingReview.setSummary("AI is currently analyzing this commit...");
-        pendingReview.setScore(0);
+        // 3. Set/Reset to Pending state
+        review.setSummary("AI is currently analyzing this commit...");
+        review.setScore(0);
+        review.setLogicErrors(null);
+        review.setPerformanceBottlenecks(null);
+        review.setSecurityVulnerabilities(null);
+        review.setCreatedAt(LocalDateTime.now());
 
-        codeReviewRepository.saveAndFlush(pendingReview);
+        // 4. Save (Hibernate handles INSERT vs UPDATE automatically based on ID)
+        codeReviewRepository.saveAndFlush(review);
 
+        // 5. Dispatch
+        dispatchToRabbit(repo, commit, commitSha);
+    }
+
+    // Keep this reAudit simple
+    @Transactional
+    public ResponseEntity<CodeReview> reAudit(String sha) throws IOException {
+        CodeReview review = codeReviewRepository.findFirstByCommitShaOrderByCreatedAtDesc(sha)
+                .orElseThrow(() -> new NoSuchElementException("Code review does not exist"));
+
+        triggerManualAudit(UUID.fromString(review.getRepoId()), sha, true);
+        return ResponseEntity.ok(review);
+    }
+
+    private void dispatchToRabbit(MonitoredRepo repo, GHCommit commit, String commitSha) throws IOException {
         Map<String, Object> job = new HashMap<>();
-
         job.put("repoId", repo.getId());
         job.put("files", githubService.convertGHCommitToPatchData(commit));
-        job.put("commitSha", commit.getSHA1());
+        job.put("commitSha", commitSha);
 
         rabbitTemplate.convertAndSend("orchestrator-exchange", "repo.update.event", job);
         System.out.println("Job sent to RabbitMQ");
-
     }
 
     @Transactional
@@ -124,17 +143,6 @@ public class MonitoredRepoService {
         GHCommit commit = repository.getCommit(commitSha);
 
         sendJob(repo, commit,isReudit);
-    }
-
-    @Transactional
-    public ResponseEntity<CodeReview> reAudit(@PathVariable String sha) throws IOException {
-
-        CodeReview review = codeReviewRepository.findFirstByCommitShaOrderByCreatedAtDesc(sha)
-                .orElseThrow(() -> new NoSuchElementException("Code review does not exist"));
-
-        triggerManualAudit(UUID.fromString(review.getRepoId()), sha, true);
-
-        return ResponseEntity.ok(review);
     }
 
     private void updateRepo(MonitoredRepo repo, String newSha) {
