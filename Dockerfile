@@ -16,8 +16,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
 WORKDIR /app
 COPY . .
 
-# Install Python dependencies (Added --break-system-packages for Ubuntu 22.04 compat)
-RUN pip3 install --no-cache-dir --break-system-packages fastapi uvicorn pika requests python-dotenv
+# Install Python dependencies using your requirements.txt
+# (Removed the --break-system-packages flag for compatibility)
+RUN pip3 install --no-cache-dir -r apps/worker/requirements.txt
 
 # 3. Build Spring Backend
 WORKDIR /app/apps/orchestrator
@@ -25,17 +26,14 @@ RUN mvn clean package -DskipTests
 
 # 4. Build Next.js Frontend
 WORKDIR /app/apps/argus-frontend
-# Ensure it builds for production
 RUN npm install --legacy-peer-deps
 RUN npm run build
 
 # 5. Final Prep
 WORKDIR /app
-# Move the supervisor config to the correct system path
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # HF Spaces exposes 7860
 EXPOSE 7860
 
-# Start Supervisor with the specific config path
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
