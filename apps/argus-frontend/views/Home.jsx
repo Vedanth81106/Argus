@@ -2,11 +2,12 @@
 
 import React from "react";
 import { SparklesCore } from "@/components/ui/sparkles";
-import { SignInButton, useUser } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
 const Home = () => {
-    const { isSignedIn } = useUser();1
+    const { isSignedIn } = useUser();
+    const { openSignIn } = useClerk();
     const router = useRouter();
 
     return (
@@ -57,13 +58,14 @@ const Home = () => {
                         </span>
                     </button>
                 ) : (
-                    <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                        <button className="group relative -skew-x-12 border bg-black px-8 py-3 transition-all hover:bg-white hover:text-black active:scale-95">
-                            <span className="cursor-pointer inline-block skew-x-12 text-sm font-bold uppercase tracking-widest text-white group-hover:text-black">
-                                Get Started
-                            </span>
-                        </button>
-                    </SignInButton>
+                    <button 
+                        onClick={() => openSignIn({ forceRedirectUrl: "/dashboard" })}
+                        className="group relative -skew-x-12 border bg-black px-8 py-3 transition-all hover:bg-white hover:text-black active:scale-95"
+                    >
+                        <span className="cursor-pointer inline-block skew-x-12 text-sm font-bold uppercase tracking-widest text-white group-hover:text-black">
+                            Get Started
+                        </span>
+                    </button>
                 )}
             </div>
         </div>

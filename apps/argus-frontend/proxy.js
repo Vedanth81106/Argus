@@ -4,7 +4,11 @@ const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)']);
 
 export default clerkMiddleware(async (auth, request) => {
     if (!isPublicRoute(request)) {
-        await auth.protect();  // auth.protect() not authObject.protect()
+
+        await auth.protect({
+            unauthorizedRedirectUrl: 'https://vedanth81106-argus.hf.space/sign-in',
+        });
+        
     }
 });
 
