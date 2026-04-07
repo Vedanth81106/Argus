@@ -27,7 +27,6 @@ Thumbs.db
 
 # --- Sensitive Config & Data ---
 .env
-application.properties
 github-cache/
 postgres_data/
 
